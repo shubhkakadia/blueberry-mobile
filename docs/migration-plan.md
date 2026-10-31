@@ -360,6 +360,31 @@ and run-now all match the web.
 **Done when:** it matches the web for current and past weeks and for every
 dish library action.
 
+**Notes (built 2026-10-31):**
+- Routes: `/house/dinner` (This week) and `/house/dinner/dishes`, a pushed
+  screen so Back returns to the week, as the web's routed sub-view does. The
+  This week | Dishes chips (`DinnerViews`) are kept on both.
+- `src/lib/dine.ts` holds the web's API and date helpers, using fixed month and
+  weekday names instead of `Intl`. "Today" uses the bridge's time zone through
+  `Intl`, which Hermes supports; it falls back to the phone's date if a zone is
+  missing.
+- `DayCard` uses an `@expo/ui` `Picker` for the dish. A removed dish appears as
+  "X (removed dish)" and choosing it does nothing, as on the web. The note
+  saves when the field loses focus; drafts are keyed by week and day, so paging
+  never carries one across.
+- The week re-reads on screen focus (including coming back from Dishes), on
+  return to the app, and on pull.
+- Tested on the Android emulator through the test bridge:
+  - dish library: add, a case-insensitive duplicate refused with the server's
+    message, inline rename, and remove with confirmation
+  - week: "Today" on the right day, picking a dish, a note with "Dish set
+    by … · note by …", paging to last week and back via the label, and a dish
+    removed elsewhere showing as "(removed dish)" with its note kept
+  - all test data was cleared afterwards
+- Fixed during testing: Android's default padding made the 38-pixel note field
+  scroll its own text and swallow page drags.
+- Not ported: the week-slide and meta-line swap animations.
+
 ### M7 — Activity · Rooms & Timeline
 - Source: `Activity.tsx`, `ActivityRooms.tsx`, `ActivityTimeline.tsx`, `runtimeApi.ts`, `useRuntime.ts`.
 - Endpoint: `GET /api/zone-runtime` (`preset=today|7d|30d|all`, `from`, `to`,
@@ -419,7 +444,7 @@ in Costs exactly as on the web.
 | M3 | Settings · General | ✅ (Android verified; iOS unchecked) |
 | M4 | Aircon · Timers | ✅ on Android (run-now untested on hardware; iOS unchecked) |
 | M5 | House · Groceries | ✅ (Android verified; iOS unchecked) |
-| M6 | House · Dinner | ☐ |
+| M6 | House · Dinner | ✅ (Android verified; iOS unchecked) |
 | M7 | Activity · Rooms & Timeline | ☐ |
 | M8 | Energy (Costs + Plan) | ☐ |
 | M9 | Release | ☐ |
