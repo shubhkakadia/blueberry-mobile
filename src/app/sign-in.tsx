@@ -79,7 +79,7 @@ export default function SignInScreen() {
               style={[styles.form, { backgroundColor: theme.surface, boxShadow: theme.shadowE2 }]}>
               <ThemedText type="display">Sign in</ThemedText>
 
-              <Field label="Bridge address" hint="Like 192.168.1.20:8080, or its Tailscale https:// address.">
+              <Field label="Bridge address" hint="Its Tailscale address, like home.your-tailnet.ts.net.">
                 {(a11y) => (
                   <Input
                     {...a11y}

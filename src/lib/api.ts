@@ -33,10 +33,14 @@ export function bridgeSocketUrl(path: string): string {
   return `${bridge.replace(/^http/, 'ws')}${path}`;
 }
 
-/** `192.168.1.20:8080` → `http://192.168.1.20:8080`. A Tailscale address keeps its `https://`. */
+/**
+ * `home.tailnet.ts.net` → `https://home.tailnet.ts.net`. Release builds allow only
+ * HTTPS (the bridge is reached over Tailscale); an explicit `http://` still works in
+ * Expo Go, for a bridge on this machine.
+ */
 export function normalizeBridge(input: string): string {
   const trimmed = input.trim().replace(/\/+$/, '');
-  return /^https?:\/\//i.test(trimmed) ? trimmed : `http://${trimmed}`;
+  return /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
 }
 
 const unauthorized = new Set<() => void>();

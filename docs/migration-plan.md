@@ -483,6 +483,43 @@ in Costs exactly as on the web.
 
 **Done when:** installed from a build (not Expo Go) on every household phone.
 
+**Notes (built 2026-10-31):**
+- EAS project `@cabipro-software/blueberry` (slug `blueberry`), linked with
+  `eas init --id`. The app is **Blueberry**, app ID `com.blueberrymandal.app` on
+  both platforms (from the domain blueberrymandal.com).
+- The bridge is reached over **Tailscale HTTPS only** (open question 2), so no
+  cleartext or local-network config. A bare address now gets `https://`; an
+  explicit `http://` still works in Expo Go for a bridge on the dev machine.
+- `eas.json`: `preview` makes an internal build (Android APK, iOS ad hoc);
+  `production` makes store builds, with build numbers kept remotely by EAS and
+  incremented on each build. No development profile: nothing native was added
+  beyond Expo Go's modules, so Expo Go is still the dev client.
+- `expo-updates` with `runtimeVersion: { policy: "appVersion" }`. JS-only fixes
+  ship with `eas update --channel production --environment production -m "…"`;
+  bump `version` in `app.json` whenever native code changes, so old builds never
+  get an update they can't run.
+- Icon and splash: a blueberry with its star crown in the app's blues, drawn by
+  a script; the adaptive icon has a monochrome layer for themed icons.
+  The template icons, including the `.icon` bundle, are gone. `ios.config.usesNonExemptEncryption: false`
+  answers Apple's export question up front (HTTPS only).
+- Checked: `expo-doctor` 20/20 (after `expo install --fix` patch bumps), and a
+  local Android prebuild (package, name, update URL, splash colours, icons).
+  iOS can't be prebuilt on Windows.
+- **First EAS build:** Android `preview`, 1.0.0 (1). EAS made and keeps the
+  signing key. Installed on the emulator; checked:
+  - **Splash, fonts and sign-in screen:** all correct.
+  - **The APK:** no advertising-ID permission, and the update URL is set.
+  - **Plain `http`:** refused. `http://10.0.2.2:8090` failed in the app while
+    `nc` from the same emulator reached it. Android 17 lets `http://localhost`
+    through, but a bridge is never on the phone itself.
+- `android.blockedPermissions` drops the template's storage and "draw over
+  other apps" permissions, and secure-store's biometric ones. The app uses none
+  of them. Applies from the next build.
+- Store publishing: [`store-setup.md`](store-setup.md) is the step-by-step
+  guide (Play internal testing and TestFlight internal recommended).
+  [`privacy-policy.md`](privacy-policy.md) is the draft policy for
+  `blueberrymandal.com/privacy`.
+
 ---
 
 ## 4. How each module is done
@@ -510,14 +547,12 @@ in Costs exactly as on the web.
 | M6 | House · Dinner | ✅ (Android verified; iOS unchecked) |
 | M7 | Activity · Rooms & Timeline | ✅ (Android verified; iOS unchecked) |
 | M8 | Energy (Costs + Plan) | ✅ (Android verified; iOS unchecked) |
-| M9 | Release | ☐ |
+| M9 | Release | 🟡 Build setup done, Android preview build verified; store setup and iOS build pending (`store-setup.md`) |
 
 ## 6. Open questions
 
-1. **App name/identity:** keep `blueberry-mobile`, or rename to Home / HMS?
-   This affects the bundle id, scheme and icon, and is cheapest to settle in M0.
-2. **Bridge address:** Tailscale HTTPS only, or also plain LAN `http`? LAN
-   adds the cleartext and local-network config work in M9.
+1. ~~**App name/identity**~~ Settled in M9: **Blueberry**, `com.blueberrymandal.app`.
+2. ~~**Bridge address**~~ Settled in M9: Tailscale HTTPS only.
 3. **Design:** match the web's look exactly (the Bridge design, see
    `Home Aircon Bridge.html`), or use native iOS/Android controls where they
    differ?
