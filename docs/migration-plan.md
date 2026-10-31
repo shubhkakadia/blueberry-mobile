@@ -239,9 +239,13 @@ shows up live. Background/foreground reconnects.
   reaching the console, background → change → resume refetch with the socket
   reconnected, the refusal toast and revert, and the default room saved. The
   unit was off and left exactly as found.
-- **Not yet exercised on hardware:** main power, mode, set point, room switches
-  and dampers. They were checked only against a mock state, because the unit
-  was off and switching it or a zone on was not approved.
+- **Hardware run, approved (2026-10-31):** from the app, power on (brought up
+  the default room, Hall), mode Cool → Fan, set point 25 → 26, and Hall's
+  damper dragged to 75% (it snapped to the 5% steps). Each change was
+  confirmed on the console and reflected in the UI, including the climate
+  re-tint. Everything was then restored, and the console's final state matched
+  the state recorded beforehand on every field. Room switches were exercised
+  through power on and off; the switch itself wasn't toggled on hardware.
 - Deferred polish: the web's motion (rolling digits, power ring, icon pop,
   sliding segment thumb, the colour cross-fade between modes), tinting the tab
   bar with the climate, and making the timer line open Timers (M4).
@@ -348,7 +352,7 @@ in Costs exactly as on the web.
 | --- | --- | --- |
 | M0 | Foundation | ✅ (Android verified; iOS unchecked) |
 | M1 | Connect & sign in | ✅ (Android verified; iOS unchecked) |
-| M2 | Aircon · Now | ✅ on Android (fan tested on the real console; power, mode, set point and rooms against a mock only) |
+| M2 | Aircon · Now | ✅ on Android, tested on the real console (iOS unchecked) |
 | M3 | Settings · General | ☐ |
 | M4 | Aircon · Timers | ☐ |
 | M5 | House · Groceries | ☐ |
