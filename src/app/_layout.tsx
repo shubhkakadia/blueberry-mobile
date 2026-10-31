@@ -68,6 +68,11 @@ function RootNavigator() {
         <Stack.Protected guard={!!user}>
           <Stack.Screen name="(tabs)" />
           <Stack.Screen name="index" />
+          {/* Above the tabs, so Costs and Energy plan share one form and no tab bar shows beneath it. */}
+          <Stack.Screen
+            name="bill/[id]"
+            options={{ presentation: 'modal', animation: 'default', headerShown: true, headerShadowVisible: false }}
+          />
         </Stack.Protected>
         <Stack.Protected guard={!user}>
           <Stack.Screen name="sign-in" />

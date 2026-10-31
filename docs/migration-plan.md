@@ -433,6 +433,46 @@ filter.
 **Done when:** a bill entered on the phone reconciles to the cent and shows up
 in Costs exactly as on the web.
 
+**Notes (built 2026-10-31):**
+- `src/lib/energy.ts` has the API and bill helpers. `src/lib/energy-format.ts`
+  has the money, date and form arithmetic without `Intl`, and no imports, so a
+  Node script can check it against the web's `Intl` output (`money`,
+  `centsFigure`, `wholeNumber`) and form maths (`draftFrom`, `reconcile`).
+- `useEnergy` (`src/hooks/use-energy.ts`) loads on focus and on return to the
+  app. Costs also polls every 60 s while focused.
+- The bill form is one root modal route, `/bill/new` or `/bill/<id>`, opened
+  from both Costs and Energy plan. Being above the tabs, it has no tab bar
+  beneath it. Save stays disabled until the bill adds up to the invoice; the
+  server's own errors show in an alert at the top. Delete asks first in a native
+  dialog.
+- `DateField` now takes a blank value ("Choose a date"), with the picker opening
+  on the nearest allowed day. The next meter read has a Clear button, since a
+  native picker cannot be emptied.
+- "Applies to" is a pair of chips rather than a select. Signed amounts use the
+  `numeric` keyboard on Android and `numbers-and-punctuation` on iOS, since
+  iOS's decimal pad has no minus key.
+- Chart colours `chartHot` / `chartBand` are now in `theme.ts`. The busiest-window
+  tile shrinks its text to fit a phone's third of the width.
+- **Fixed in the shared `Input`:** on Android, any change to a field's border or
+  halo after mount reset its padding to the platform default. React Native
+  swaps the background drawable, and does not re-apply padding unless the
+  layout changes. The text sat on the field's edge after focus everywhere since
+  M1, which is how it went unnoticed. The field's border width now shifts by
+  0.01 with each look, so the padding is set again.
+- Tested on the Android emulator against the test bridge, with the console
+  address pointed at localhost: empty states; adding a bill (1–31 Aug 2026,
+  300 kWh at 30 c/kWh and 100 c/day = $121.00) with the
+  short and over messages, a percentage discount on both scopes, and a −$2.50
+  credit. Then Costs: bars, forecast band, sentence and tiles, in light and dark.
+  Energy plan's rates; an edit adding a second period, rejected by the server
+  until it ended before the issue date; clearing the next read; and delete.
+  The test bill is gone.
+- Not ported: rolling numbers, bar grow-in, and the period rows' open and close
+  animation.
+- Found, not fixed: the web build (`expo start --web`) throws at start-up,
+  because react-native-web's `Appearance` has no `setColorScheme`
+  (`src/lib/theme-preference.ts`, since M3). Phones are unaffected.
+
 ### M9 — Release
 - EAS: `eas.json` with development / preview / production profiles, and a
   development build if any module added native code.
@@ -469,7 +509,7 @@ in Costs exactly as on the web.
 | M5 | House · Groceries | ✅ (Android verified; iOS unchecked) |
 | M6 | House · Dinner | ✅ (Android verified; iOS unchecked) |
 | M7 | Activity · Rooms & Timeline | ✅ (Android verified; iOS unchecked) |
-| M8 | Energy (Costs + Plan) | ☐ |
+| M8 | Energy (Costs + Plan) | ✅ (Android verified; iOS unchecked) |
 | M9 | Release | ☐ |
 
 ## 6. Open questions

@@ -29,6 +29,8 @@ export const Icons = {
   chevronLeft: { ios: 'chevron.left', android: 'chevron_left', web: 'chevron_left' },
   dish: { ios: 'fork.knife', android: 'restaurant', web: 'restaurant' },
   person: { ios: 'person', android: 'person', web: 'person' },
+  receipt: { ios: 'doc.text', android: 'receipt_long', web: 'receipt_long' },
+  checkCircle: { ios: 'checkmark.circle.fill', android: 'check_circle', web: 'check_circle' },
   activity: { ios: 'chart.bar', android: 'bar_chart', web: 'bar_chart' },
   signOut: { ios: 'rectangle.portrait.and.arrow.right', android: 'logout', web: 'logout' },
 } satisfies Record<string, IconName>;

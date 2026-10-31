@@ -75,6 +75,10 @@ export const Colors = {
     tagQuiet: '#e6eae7',
     tagQuietFg: '#1d2e2a',
 
+    /** Activity · Costs: the busiest runtime window, and the ±8% range behind a forecast bar. */
+    chartHot: '#a0461a',
+    chartBand: 'rgba(160, 70, 26, 0.18)',
+
     shadowE1: '0 1px 2px rgba(20, 32, 42, 0.06)',
     shadowE2: '0 1px 2px rgba(14, 59, 99, 0.08), 0 12px 32px rgba(14, 59, 99, 0.08)',
     shadowSegment: '0 1px 2px rgba(20, 32, 42, 0.12)',
@@ -140,6 +144,9 @@ export const Colors = {
     tagConsoleFg: '#cfccf6',
     tagQuiet: '#18221f',
     tagQuietFg: '#c2ddd6',
+
+    chartHot: '#f09a70',
+    chartBand: 'rgba(240, 154, 112, 0.2)',
 
     // A shadow does nothing on a near-black canvas, so the lift is a faint ring instead.
     shadowE1: '0 0 0 1px rgba(255, 255, 255, 0.045)',

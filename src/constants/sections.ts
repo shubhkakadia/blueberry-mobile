@@ -12,6 +12,11 @@ export const ACTIVITY_SECTIONS: { label: string; href: Href }[] = [
   { label: 'Costs', href: '/activity/costs' },
 ];
 
+export const SETTINGS_SECTIONS: { label: string; href: Href }[] = [
+  { label: 'General', href: '/settings' },
+  { label: 'Energy plan', href: '/settings/plan' },
+];
+
 export const HOUSE_SECTIONS: { label: string; href: Href }[] = [
   { label: 'Groceries', href: '/house' },
   { label: 'Dinner', href: '/house/dinner' },

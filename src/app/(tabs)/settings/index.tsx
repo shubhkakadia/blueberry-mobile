@@ -1,14 +1,15 @@
 import { Host, Picker } from '@expo/ui';
 import { useEffect, useState, type ReactNode } from 'react';
-import { Pressable, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 
-import { ComingSoon } from '@/components/coming-soon';
+import { Segments } from '@/components/segments';
 import { ThemedText } from '@/components/themed-text';
 import { Alert } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Icons } from '@/constants/icons';
-import { Radius } from '@/constants/theme';
+import { SETTINGS_SECTIONS } from '@/constants/sections';
+import { Gutter, Radius } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useSystemState } from '@/hooks/use-system-state';
 import { useTheme } from '@/hooks/use-theme';
@@ -38,7 +39,8 @@ export default function SettingsScreen() {
   const divider = { borderTopWidth: 1, borderColor: theme.hairline };
 
   return (
-    <ComingSoon sections={[['Energy plan', 'M8']]}>
+    <ScrollView contentInsetAdjustmentBehavior="automatic" contentContainerStyle={styles.content}>
+      <Segments items={SETTINGS_SECTIONS} selected={0} />
       {room.error && (
         <Alert tone="warning" title="Your default room wasn't saved." onDismiss={room.dismissError}>
           {room.error}
@@ -165,7 +167,7 @@ export default function SettingsScreen() {
       <ThemedText type="meta" themeColor="fgMuted" style={styles.footer}>
         Aircon control · local network only. Nothing here leaves the house.
       </ThemedText>
-    </ComingSoon>
+    </ScrollView>
   );
 }
 
@@ -237,4 +239,5 @@ const styles = StyleSheet.create({
   dot: { width: 9, height: 9, borderRadius: 4.5 },
   value: { flexShrink: 1, textAlign: 'right', fontVariant: ['tabular-nums'] },
   footer: { paddingHorizontal: 4, marginTop: 8, marginBottom: 12 },
+  content: { padding: Gutter, paddingBottom: 40, gap: 8 },
 });

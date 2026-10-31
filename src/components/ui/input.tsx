@@ -38,6 +38,10 @@ export function Input({ invalid, fieldSize = 'lg', editable = true, style, onFoc
           color: theme.fg,
           backgroundColor: theme.surfaceField,
           borderColor: invalid ? theme.danger : focused ? theme.accent : theme.border,
+          // Android swaps the field's background drawable whenever its border or halo changes,
+          // and the new one resets the padding to the theme's. A hair's change of border width
+          // with each look makes React Native set the padding again in the same update.
+          borderWidth: 1 + (focused ? 0.01 : 0) + (invalid ? 0.02 : 0),
         },
         focused && { boxShadow: `0 0 0 3px ${theme.accentSoft}` },
         !editable && styles.disabled,

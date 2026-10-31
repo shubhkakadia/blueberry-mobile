@@ -65,24 +65,31 @@ function dayToDate(day: string): Date {
 const toDay = (date: Date) =>
   `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
 
-/** A calendar day, `YYYY-MM-DD`, picked the same way as `TimeField`. */
+/**
+ * A calendar day, `YYYY-MM-DD`, picked the same way as `TimeField`. A blank
+ * value shows "Choose a date"; the picker then opens on the nearest allowed day.
+ */
 export function DateField({
   label,
   value,
   onChange,
   minimum,
   maximum,
+  size = 'md',
 }: {
   label: string;
   value: string;
   onChange: (day: string) => void;
   minimum?: string;
   maximum?: string;
+  /** `sm` is the 12px label used in dense grids such as a rate period. */
+  size?: 'sm' | 'md';
 }) {
   const theme = useTheme();
   const scheme = useColorScheme() === 'dark' ? 'dark' : 'light';
-  const date = dayToDate(value);
-  const shown = `${date.getDate()} ${MONTHS[date.getMonth()]} ${date.getFullYear()}`;
+  const fallback = toDay(new Date());
+  const date = dayToDate(value || (maximum && fallback > maximum ? maximum : minimum && fallback < minimum ? minimum : fallback));
+  const shown = value ? `${date.getDate()} ${MONTHS[date.getMonth()]} ${date.getFullYear()}` : 'Choose a date';
   const bounds = {
     ...(minimum ? { minimumDate: dayToDate(minimum) } : {}),
     ...(maximum ? { maximumDate: dayToDate(maximum) } : {}),
@@ -90,8 +97,8 @@ export function DateField({
   const pick = (_: unknown, picked: Date) => onChange(toDay(picked));
 
   return (
-    <Field label={label} style={styles.field}>
-      {Platform.OS === 'ios' ? (
+    <Field label={label} size={size} style={styles.field}>
+      {Platform.OS === 'ios' && value ? (
         <DateTimePicker
           value={date}
           mode="date"
@@ -106,13 +113,21 @@ export function DateField({
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={`${label}, ${shown}`}
-          onPress={() => DateTimePickerAndroid.open({ value: date, mode: 'date', onValueChange: pick, ...bounds })}
+          onPress={() =>
+            Platform.OS === 'ios'
+              ? // iOS's inline picker has no blank state: start it on the nearest allowed day.
+                onChange(toDay(date))
+              : DateTimePickerAndroid.open({ value: date, mode: 'date', onValueChange: pick, ...bounds })
+          }
           style={({ pressed }) => [
             styles.box,
+            size === 'sm' && styles.boxSmall,
             { borderColor: theme.border, backgroundColor: theme.surfaceField },
             pressed && { borderColor: theme.accent },
           ]}>
-          <ThemedText style={styles.tabular}>{shown}</ThemedText>
+          <ThemedText type={size === 'sm' ? 'body' : 'base'} themeColor={value ? 'fg' : 'fgSubtle'} numberOfLines={1} style={styles.tabular}>
+            {shown}
+          </ThemedText>
         </Pressable>
       )}
     </Field>
@@ -123,5 +138,6 @@ const styles = StyleSheet.create({
   field: { flex: 1 },
   ios: { alignSelf: 'flex-start' },
   box: { height: 48, borderWidth: 1, borderRadius: Radius.field, paddingHorizontal: 14, justifyContent: 'center' },
+  boxSmall: { height: 44, paddingHorizontal: 10 },
   tabular: { fontVariant: ['tabular-nums'] },
 });
