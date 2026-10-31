@@ -5,3 +5,8 @@ export const AIRCON_SECTIONS: { label: string; href: Href }[] = [
   { label: 'Now', href: '/aircon' },
   { label: 'Timers', href: '/aircon/timers' },
 ];
+
+export const HOUSE_SECTIONS: { label: string; href: Href }[] = [
+  { label: 'Groceries', href: '/house' },
+  { label: 'Dinner', href: '/house/dinner' },
+];

@@ -327,6 +327,26 @@ and run-now all match the web.
 
 **Done when:** a change on one phone shows on another after refresh or refocus.
 
+**Notes (built 2026-10-31):**
+- House is a stack with Groceries (`/house`) and Dinner (`/house/dinner`,
+  a placeholder until M6), switched by `Segments`.
+- `src/lib/checklists.ts` holds the API, the list order and the "added"
+  formatter. `src/components/grocery-row.tsx` is the row: a tick circle, the
+  name, who added it and when, and swipe-left to Remove via `ReanimatedSwipeable`.
+  Removing confirms with a native alert, and screen readers get Remove as an
+  accessibility action. A `GestureHandlerRootView` now wraps the app.
+- The web's logic is kept: optimistic ticking that reverts on refusal, no stale
+  reload while a tick is in flight, pill counts in step, Indian Store first.
+  Lists load from handlers rather than effects, which this project's React lint
+  rules require.
+- The list re-reads on screen focus, on return to the app, and on pull to
+  refresh.
+- Tested on the Android emulator through the test bridge: add (button and
+  Done key), tick → Bought section and count, an item added by another client
+  appearing on foreground, swipe → Remove → confirm, list switching, untick,
+  and the Dinner segment. All test items were removed afterwards.
+- Not ported: the web's row glide, tick-draw and list-slide animations.
+
 ### M6 — House · Dinner
 - Source: `DineMenu.tsx`, `DishLibrary.tsx`, `dineApi.ts`.
 - Endpoints: `GET/POST /api/dishes`, `PATCH/DELETE /api/dishes/:id`,
@@ -398,7 +418,7 @@ in Costs exactly as on the web.
 | M2 | Aircon · Now | ✅ on Android, tested on the real console (iOS unchecked) |
 | M3 | Settings · General | ✅ (Android verified; iOS unchecked) |
 | M4 | Aircon · Timers | ✅ on Android (run-now untested on hardware; iOS unchecked) |
-| M5 | House · Groceries | ☐ |
+| M5 | House · Groceries | ✅ (Android verified; iOS unchecked) |
 | M6 | House · Dinner | ☐ |
 | M7 | Activity · Rooms & Timeline | ☐ |
 | M8 | Energy (Costs + Plan) | ☐ |

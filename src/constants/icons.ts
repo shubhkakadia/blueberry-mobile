@@ -21,6 +21,7 @@ export const Icons = {
   console: { ios: 'antenna.radiowaves.left.and.right', android: 'router', web: 'router' },
   house: { ios: 'house', android: 'home', web: 'home' },
   pencil: { ios: 'pencil', android: 'edit', web: 'edit' },
+  check: { ios: 'checkmark', android: 'check', web: 'check' },
   trash: { ios: 'trash', android: 'delete', web: 'delete' },
   sliders: { ios: 'slider.horizontal.3', android: 'tune', web: 'tune' },
   chevronDown: { ios: 'chevron.down', android: 'expand_more', web: 'expand_more' },
