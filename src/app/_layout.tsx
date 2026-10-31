@@ -13,6 +13,7 @@ import { useEffect } from 'react';
 
 import { FontFamily, navigationTheme } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { AuthProvider, useAuth } from '@/lib/auth';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -32,10 +33,20 @@ const FONTS = [
 ];
 
 export default function RootLayout() {
+  return (
+    <AuthProvider>
+      <RootNavigator />
+    </AuthProvider>
+  );
+}
+
+function RootNavigator() {
   const scheme = useColorScheme() === 'dark' ? 'dark' : 'light';
   const [loaded, error] = useFonts(FONTS);
+  const { user } = useAuth();
   // A font that fails to load falls back to the system face rather than holding the splash forever.
-  const ready = loaded || error !== null;
+  // The splash also covers the session check, so the app opens on the right screen without a flash.
+  const ready = (loaded || error !== null) && user !== undefined;
 
   useEffect(() => {
     if (ready) SplashScreen.hideAsync();
@@ -45,7 +56,16 @@ export default function RootLayout() {
 
   return (
     <ThemeProvider value={navigationTheme(scheme)}>
-      <Stack screenOptions={{ headerShown: false }} />
+      {/* Signing in or out swaps the whole app at once, as the web does. */}
+      <Stack screenOptions={{ headerShown: false, animation: 'none' }}>
+        <Stack.Protected guard={!!user}>
+          <Stack.Screen name="(tabs)" />
+          <Stack.Screen name="index" />
+        </Stack.Protected>
+        <Stack.Protected guard={!user}>
+          <Stack.Screen name="sign-in" />
+        </Stack.Protected>
+      </Stack>
     </ThemeProvider>
   );
 }

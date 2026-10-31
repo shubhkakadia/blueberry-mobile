@@ -73,6 +73,9 @@ upgrade request.
 - **Fallback, only if the spike fails:** a small bridge change. `attachUser` and
   `verifyClient` also accept `Authorization: Bearer <token>`, login returns the
   token to native clients, and the app stores it with `expo-secure-store`.
+- **Result (M1, Android):** the cookie authenticates both `fetch` and the `/ws`
+  upgrade, and survives a force-stop. No bridge change is needed. iOS is still
+  to be confirmed on a device.
 
 ### 2.3 Live state
 `subscribe()` in `web/src/api.ts` opens `ws(s)://<host>/ws` and reconnects after
@@ -89,7 +92,7 @@ upgrade request.
 | `window` `hms:unauthorized` event | Auth context; `request()` calls `signOut()` on 401 |
 | `visibilitychange` / `focus` refresh (Checklist, Dine, Costs) | `AppState` + `useFocusEffect` |
 | `localStorage` theme | Stored setting + `Appearance.setColorScheme` |
-| `visualViewport` keyboard inset | `KeyboardAvoidingView` |
+| `visualViewport` keyboard inset | `KeyboardAvoidingView` with `behavior="padding"` on **both** platforms (edge-to-edge Android doesn't resize for the keyboard) |
 | `FormScreen` portal, `Sheet` | Router screens with `presentation: 'formSheet'` / `'modal'` |
 | `PullToRefresh` | `RefreshControl` on `ScrollView` / `FlatList` |
 | Swipe-to-delete rows | `ReanimatedSwipeable` (gesture-handler, already installed) |
@@ -179,6 +182,26 @@ light and dark mode. Lint and typecheck are clean.
 
 **Done when:** you can sign in, survive an app restart and sign out. A wrong
 password and a lockout show the server's message.
+
+**Notes (built 2026-10-31):**
+- `src/lib/api.ts` holds `request()` (base URL, 15 s timeout, 401 → sign
+  out, `{ error }` → message) and `authApi`. `src/lib/auth.tsx` holds
+  `AuthProvider`, `useAuth` and `useUser`. The bridge address is in
+  `expo-secure-store` and is stored only after a sign-in succeeds.
+- The launch session check runs under the splash screen rather than a
+  skeleton, so the app opens directly on the right screen. `/api/auth/me` times
+  out after 5 s, and if the bridge can't be reached, sign-in says so.
+- Sign-in checks `/healthz` before sending a password. Root stack guards use
+  `Stack.Protected`, and the swap has no animation, as on the web.
+- The password field is uncontrolled. On Android, echoing `value` back into a
+  secure field swapped fast keystrokes, so the wrong password was sent.
+- Tested on the Android emulator against a throwaway local bridge (copy of the
+  bridge code, scratch DB, no aircon): wrong password, sign-in, force-stop
+  and relaunch, the `/ws` spike, sign-out, a session revoked from the bridge
+  CLI, and an unreachable bridge.
+- Testing gotcha: adb key events make Gboard act as a hardware keyboard. Its
+  Enter key left the incoming tab part-faded, which a person tapping Gboard's
+  own Go key never triggered. Use on-screen keys when testing forms.
 
 ### M2 — Aircon · Now
 - Source: `AirconNow.tsx` (largest screen), `useSystemState.ts`, `api.ts`,
@@ -296,7 +319,7 @@ in Costs exactly as on the web.
 | # | Module | Status |
 | --- | --- | --- |
 | M0 | Foundation | ✅ (Android verified; iOS unchecked) |
-| M1 | Connect & sign in | ☐ |
+| M1 | Connect & sign in | ✅ (Android verified; iOS unchecked) |
 | M2 | Aircon · Now | ☐ |
 | M3 | Settings · General | ☐ |
 | M4 | Aircon · Timers | ☐ |

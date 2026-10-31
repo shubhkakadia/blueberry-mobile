@@ -9,4 +9,6 @@ export const Icons = {
   refresh: { ios: 'arrow.clockwise', android: 'refresh', web: 'refresh' },
   close: { ios: 'xmark', android: 'close', web: 'close' },
   revert: { ios: 'arrow.uturn.backward', android: 'undo', web: 'undo' },
+  cool: { ios: 'snowflake', android: 'ac_unit', web: 'ac_unit' },
+  signOut: { ios: 'rectangle.portrait.and.arrow.right', android: 'logout', web: 'logout' },
 } satisfies Record<string, IconName>;

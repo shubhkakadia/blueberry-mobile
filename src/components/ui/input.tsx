@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { StyleSheet, TextInput, type TextInputProps } from 'react-native';
+import { useState, type Ref } from 'react';
+import { StyleSheet, TextInput, type TextInputInstance, type TextInputProps } from 'react-native';
 
 import { FontFamily, Radius } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
@@ -7,6 +7,7 @@ import { useTheme } from '@/hooks/use-theme';
 const HEIGHT = { md: 44, lg: 48 } as const;
 
 export type InputProps = TextInputProps & {
+  ref?: Ref<TextInputInstance>;
   invalid?: boolean;
   /** `lg` (48px) for a form's main fields; `md` (44px) for dense grids. */
   fieldSize?: keyof typeof HEIGHT;
