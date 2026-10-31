@@ -6,6 +6,7 @@ import {
   normalizeBridge,
   onUnauthorized,
   rememberBridgeAddress,
+  request,
   setBridgeAddress,
   type AuthUser,
 } from '@/lib/api';
@@ -19,6 +20,8 @@ interface Auth {
   notice: string | null;
   signIn: (address: string, username: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
+  /** The room that comes on with the main unit. Shown at once; rejects if the bridge did not save it. */
+  selectRoom: (zoneNumber: number) => Promise<void>;
 }
 
 const AuthContext = createContext<Auth | null>(null);
@@ -60,7 +63,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
   };
 
-  return <AuthContext value={{ user, bridge, notice, signIn, signOut }}>{children}</AuthContext>;
+  const selectRoom = async (zoneNumber: number) => {
+    setUser((current) => current && { ...current, selectedZoneNumber: zoneNumber });
+    await request('/api/account/preferences', {
+      method: 'PATCH',
+      body: JSON.stringify({ selectedZoneNumber: zoneNumber }),
+    });
+  };
+
+  return (
+    <AuthContext value={{ user, bridge, notice, signIn, signOut, selectRoom }}>{children}</AuthContext>
+  );
 }
 
 export function useAuth(): Auth {

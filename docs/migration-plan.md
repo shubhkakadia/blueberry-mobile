@@ -221,6 +221,34 @@ password and a lockout show the server's message.
 setpoint, zone power and damper all work. A change made from the wall console
 shows up live. Background/foreground reconnects.
 
+**Notes (built 2026-10-31):**
+- Code: `src/lib/aircon.ts` (types, commands, `subscribe`),
+  `src/hooks/use-system-state.ts` (the web's optimistic layering and debounce,
+  unchanged in logic), `src/components/aircon-now.tsx` (the UI), and
+  `src/app/(tabs)/aircon/index.tsx` (wiring, header pill, refusal toast).
+- Climate colours use a `ThemeOverride` context in `src/hooks/use-theme.ts`, the
+  native equivalent of the web's `climateVars`.
+- Room switches are RN `Switch`. Dampers are the `@expo/ui` universal `Slider`
+  (native, in Expo Go), tinted through its `Host`'s `seedColor`.
+- The default room is kept in the auth context (`selectRoom`). On first use
+  it's saved as the first room, as on the web; M3's room picker reuses this.
+- **Tested against the real AirTouch** (found by the bridge's discovery at
+  192.168.68.54) through a throwaway bridge with a scratch DB and a test
+  account; the household DB was not touched. Covered: real state rendering, a
+  change pushed from another client appearing live, a fan command from the app
+  reaching the console, background → change → resume refetch with the socket
+  reconnected, the refusal toast and revert, and the default room saved. The
+  unit was off and left exactly as found.
+- **Not yet exercised on hardware:** main power, mode, set point, room switches
+  and dampers. They were checked only against a mock state, because the unit
+  was off and switching it or a zone on was not approved.
+- Deferred polish: the web's motion (rolling digits, power ring, icon pop,
+  sliding segment thumb, the colour cross-fade between modes), tinting the tab
+  bar with the climate, and making the timer line open Timers (M4).
+- As on the web, the pill shows the bridge's view of the console, so it stays
+  "Live" if the phone itself loses the bridge. Commands then fail with
+  "Couldn't reach the bridge".
+
 ### M3 — Settings · General
 - Source: `Settings.tsx`, `useTheme.ts`, `ThemeProvider.tsx`.
 - Endpoints: `GET /api/health`, `GET /api/state`, `PATCH /api/account/preferences`.
@@ -320,7 +348,7 @@ in Costs exactly as on the web.
 | --- | --- | --- |
 | M0 | Foundation | ✅ (Android verified; iOS unchecked) |
 | M1 | Connect & sign in | ✅ (Android verified; iOS unchecked) |
-| M2 | Aircon · Now | ☐ |
+| M2 | Aircon · Now | ✅ on Android (fan tested on the real console; power, mode, set point and rooms against a mock only) |
 | M3 | Settings · General | ☐ |
 | M4 | Aircon · Timers | ☐ |
 | M5 | House · Groceries | ☐ |

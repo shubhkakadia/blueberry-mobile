@@ -27,6 +27,12 @@ export async function rememberBridgeAddress(): Promise<void> {
   if (bridge) await SecureStore.setItemAsync(BRIDGE_KEY, bridge);
 }
 
+/** `ws(s)://` for a path on the bridge, e.g. the live-state socket. */
+export function bridgeSocketUrl(path: string): string {
+  if (!bridge) throw new Error('No bridge address is set.');
+  return `${bridge.replace(/^http/, 'ws')}${path}`;
+}
+
 /** `192.168.1.20:8080` → `http://192.168.1.20:8080`. A Tailscale address keeps its `https://`. */
 export function normalizeBridge(input: string): string {
   const trimmed = input.trim().replace(/\/+$/, '');

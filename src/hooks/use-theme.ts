@@ -3,12 +3,22 @@
  * https://docs.expo.dev/guides/color-schemes/
  */
 
-import { Colors } from '@/constants/theme';
+import { createContext, use } from 'react';
+
+import { Colors, type ThemeColor } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
-export function useTheme() {
-  const scheme = useColorScheme();
-  const theme = scheme === 'dark' ? 'dark' : 'light';
+export type Palette = { [K in ThemeColor]: string };
 
-  return Colors[theme];
+/**
+ * Re-themes everything inside it - the web's `climateVars`. That is how changing
+ * mode re-colours Aircon · Now without a single component knowing which mode it is in.
+ */
+export const ThemeOverride = createContext<Partial<Palette> | null>(null);
+
+export function useTheme(): Palette {
+  const scheme = useColorScheme();
+  const override = use(ThemeOverride);
+  const base = Colors[scheme === 'dark' ? 'dark' : 'light'];
+  return override ? { ...base, ...override } : base;
 }
