@@ -1,0 +1,319 @@
+# Home Management System → Expo app: migration plan
+
+Source: `C:\Users\Shubh\OneDrive\Desktop\Home-Management-System`
+([github.com/shubhkakadia/Home-Management-System](https://github.com/shubhkakadia/Home-Management-System))
+Target: this repo (`blueberry-mobile`, Expo SDK 58, Expo Router, React 19.3, RN 0.88)
+
+We port it one module at a time. Each module ends as a working, tested slice
+of the app.
+
+---
+
+## 1. What exists today
+
+The Home Management System has two halves:
+
+| Part | Where | What it does |
+| --- | --- | --- |
+| **Bridge** (backend) | `src/` | Node + Express + `ws` + SQLite (`better-sqlite3`). Holds **one** TCP socket to the AirTouch 4 console on the LAN, polls it, runs the timer scheduler, logs zone runtime, and serves a REST API + a `/ws` live-state stream. Cookie sessions (`hms_session`). |
+| **Web UI** (frontend) | `web/` | React 18 + Vite + Tailwind 4 PWA. Four tabs (Aircon, House, Activity, Settings) with segments, hash routing, its own small UI kit in `web/src/ui/`. |
+
+### Decision: only the web UI moves here
+
+The bridge **cannot** run on a phone. It needs an always-on process on the home
+network: one persistent socket to the console, a scheduler that fires at 06:30,
+and a SQLite file. So:
+
+- The **bridge stays** in the Home-Management-System repo and keeps running on
+  the home machine. It is unchanged unless a module below says otherwise.
+- **This app replaces `web/`** as a native client of the bridge's existing API.
+- The existing web PWA keeps working alongside it. We are not building an Expo
+  *web* target. It would duplicate the PWA and would need CORS on the bridge.
+
+### What we reuse and what we rewrite
+
+| Reuse almost as-is (pure TS) | Rewrite for React Native |
+| --- | --- |
+| API types and request shapes (`api.ts`, `*Api.ts`) | Every `.tsx` screen (DOM + Tailwind → RN views + `StyleSheet`) |
+| `useSystemState.ts` (optimistic patch layering, `useDebouncedValue`) | `web/src/ui/*` kit → a small RN kit in `src/components/ui/` |
+| Helpers: `zones.ts`, `climateTheme.ts` tokens, `describeDays` / `describeNextRun` / `formatClock`, `money` / `billRange` / `billDays`, runtime range helpers | `useHashRoute`, `nav.ts` → Expo Router files |
+| Validation rules are in the bridge already, so the client only mirrors them | `NativeInteractions.tsx` (pull-to-refresh, swipe rows), `Motion.tsx`, `Sheet`, `FormScreen`, `Toast` |
+
+---
+
+## 2. Cross-cutting concerns (solved once, in Modules 0–1)
+
+### 2.1 Reaching the bridge
+The web UI used relative URLs (same origin). The app needs a **bridge address**,
+entered on the sign-in screen and kept on the device. Two expected kinds:
+
+- **Tailscale Serve:** `https://<machine>.<tailnet>.ts.net`. Recommended:
+  it is HTTPS, works away from home, and needs no cleartext exceptions.
+- **LAN:** `http://192.168.x.x:8080`. Plain HTTP needs platform config:
+  - Android blocks cleartext in release builds → enable it via `app.json` /
+    `expo-build-properties`.
+  - iOS needs the local-network usage description (and an ATS exception for
+    `http`).
+
+  Look up the exact keys in the SDK 58 docs when we get there.
+
+One `request()` helper in `src/lib/api.ts` prefixes the base URL, sets JSON
+headers, maps `401` to "signed out", and turns `{ error }` bodies into thrown
+messages. Every web `*Api.ts` has its own copy of this today. Here they all share
+one.
+
+### 2.2 Auth
+The bridge uses an `HttpOnly` cookie. React Native's `fetch` stores and resends
+cookies through the native cookie jar, so **login should work with zero bridge
+changes**. The risk is the WebSocket: `verifyClient` reads the cookie from the
+upgrade request.
+
+- **Spike in Module 1:** sign in, kill and relaunch the app, then confirm `/api/auth/me`
+  and `/ws` both still authenticate on **iOS and Android**.
+- **Fallback, only if the spike fails:** a small bridge change. `attachUser` and
+  `verifyClient` also accept `Authorization: Bearer <token>`, login returns the
+  token to native clients, and the app stores it with `expo-secure-store`.
+
+### 2.3 Live state
+`subscribe()` in `web/src/api.ts` opens `ws(s)://<host>/ws` and reconnects after
+2 s. On mobile it also has to:
+- close the socket when the app goes to the background, and reopen it plus
+  refetch `/api/state` when it comes back (`AppState`).
+- build the `ws` URL from the stored bridge address.
+
+### 2.4 Browser APIs → native replacements
+
+| Web | Native |
+| --- | --- |
+| Hash routes (`useHashRoute`, `nav.ts`) | Expo Router file routes |
+| `window` `hms:unauthorized` event | Auth context; `request()` calls `signOut()` on 401 |
+| `visibilitychange` / `focus` refresh (Checklist, Dine, Costs) | `AppState` + `useFocusEffect` |
+| `localStorage` theme | Stored setting + `Appearance.setColorScheme` |
+| `visualViewport` keyboard inset | `KeyboardAvoidingView` |
+| `FormScreen` portal, `Sheet` | Router screens with `presentation: 'formSheet'` / `'modal'` |
+| `PullToRefresh` | `RefreshControl` on `ScrollView` / `FlatList` |
+| Swipe-to-delete rows | `ReanimatedSwipeable` (gesture-handler, already installed) |
+| CSS / View Transitions motion | `react-native-reanimated` (already installed) |
+| `lucide-react` + `icons.tsx` SVGs | `expo-symbols` (installed); check Android support in v58 docs |
+| Geologica `.woff2` | Geologica `.ttf` via `expo-font` (RN can't load woff2) |
+| Div-height bar charts | Plain `View`s with computed heights, no chart library |
+| `<input type=range>` / `Slider` | `@expo/ui` slider if it fits, otherwise community slider |
+| Date inputs (bill form) | `@expo/ui` date picker; check v58 docs |
+
+### 2.5 Target route map
+
+```
+src/app/
+  _layout.tsx              root Stack; auth guard (Stack.Protected), fonts, theme
+  sign-in.tsx              bridge address + username + password
+  (tabs)/_layout.tsx       NativeTabs: Aircon · House · Activity · Settings
+  (tabs)/aircon/           now (index), timers/, timers/[id] (formSheet; id = "new" | number)
+  (tabs)/house/            groceries, dinner (week), dinner/dishes
+  (tabs)/activity/         rooms, timeline, costs
+  (tabs)/settings/         general (index), plan, plan/[billId] (formSheet)
+```
+
+Each tab is a Stack. Its segments (Now / Timers, Groceries / Dinner, …) are
+switched by a segmented control at the top, as in the web UI. The route names
+match the web sections (`#/activity/costs` → `/activity/costs`), so deep links
+carry over.
+
+Non-route code lives outside `src/app/`: `src/lib/` (api, types, helpers),
+`src/hooks/`, `src/components/` (+ `ui/`), `src/constants/theme.ts`.
+
+---
+
+## 3. Modules
+
+The order puts daily aircon use on the phone as early as possible (M0–M3).
+After that come the remaining House and Activity features. Each module lists
+the source to port, the endpoints it uses, and what "done" means.
+
+### M0 — Foundation
+- Remove template demo screens and assets (`explore.tsx`, hint rows, web badge, animated icon).
+- Theme: port the light/dark tokens from `web/src/index.css`, plus the climate
+  tints from `web/src/climateTheme.ts`, into `src/constants/theme.ts`. Add
+  Geologica TTF via `expo-font`.
+- Tab shell: `NativeTabs` with the 4 tabs and empty placeholder screens.
+- UI kit, **only what M1–M2 need first**: Button, Card, Field/Input, Alert,
+  Toast, Skeleton. Port the rest (Chip, Switch, Sheet, EmptyState, Disclosure,
+  Slider) when a module needs it.
+- App name, scheme and icon placeholders in `app.json` (see open questions).
+
+**Done when:** the app launches on iOS and Android with four themed tabs, in
+light and dark mode. Lint and typecheck are clean.
+
+**Notes (built 2026-10-31):**
+- Tokens live in `src/constants/theme.ts` (`Colors`, `Type`, `Radius`,
+  climate tints), icons in `src/constants/icons.ts`, and the kit in
+  `src/components/ui/`.
+- Geologica comes from `@expo-google-fonts/geologica`: six static weights
+  (200–700) registered as one `Geologica` family via SDK 58's multi-face
+  `useFonts`, so `fontWeight` picks the face.
+- `expo-symbols` covers iOS (SF Symbols) and Android/web (Material Symbols) in
+  SDK 58. Tab icons use NativeTabs' `sf` / `md` props.
+- Removed the unused `expo-device`, `expo-image` and `expo-web-browser`. Kept
+  `expo-glass-effect`, because expo-router depends on it.
+- `web.output` is now `single`: server rendering caused hydration mismatches
+  (wrong colour scheme) in the dev preview, and nothing here needs it.
+- Reanimated entering animations are skipped on web (they leave views
+  `position: absolute`). See `src/components/ui/motion.ts`.
+- Android tabs use `labelVisibilityMode="labeled"`, so every tab shows its
+  label as on the web (Material hides unselected labels by default).
+- Verified on the Android emulator in Expo Go 58.0.5: tabs and navigation, the
+  header, placeholders, and every kit component in light and dark mode
+  (including Material icons, shadows, and the toast's exit animation). Also
+  checked in the web preview. **Not verified on iOS:** this machine has no
+  simulator, so large titles and the iOS 26 glass tab bar are unchecked.
+
+### M1 — Connect & sign in
+- Source: `Login.tsx`, `authApi.ts`, the session check in `App.tsx`.
+- Endpoints: `POST /api/auth/login`, `POST /api/auth/logout`, `GET /api/auth/me`, `GET /healthz`.
+- Sign-in screen: bridge address with a reachability check (`/healthz`),
+  username and password. Show the server's error text, including the 429
+  lockout message.
+- Auth context: `undefined` = checking (skeleton), `null` = signed out (guarded
+  routes). Any 401 drops the user to sign-in.
+- Settings tab gets a minimal Account card with Sign out.
+- **Run the cookie/WebSocket spike from §2.2 and record the result here.**
+
+**Done when:** you can sign in, survive an app restart and sign out. A wrong
+password and a lockout show the server's message.
+
+### M2 — Aircon · Now
+- Source: `AirconNow.tsx` (largest screen), `useSystemState.ts`, `api.ts`,
+  `zones.ts`, `climateTheme.ts`, `Layout.tsx` (`ConnectionPill`).
+- Endpoints: `GET /api/state`, `/ws`, `POST /api/ac/:id/{power,mode,fan,setpoint}`,
+  `POST /api/zones/:id/{power,percentage,setpoint}`, `PATCH /api/account/preferences`,
+  `GET /api/schedules` (the "next timer" line only).
+- Keep the optimistic patch layering exactly as it is. A poll landing mid-command
+  must not snap a control back.
+- Debounce the setpoint and damper sliders (`useDebouncedValue`, 350 ms).
+- The page background follows the AC mode (climate theme).
+- Show the connection pill and a toast with the "didn't accept X, so it's been
+  set back" wording.
+- AppState handling for the socket (§2.3).
+
+**Done when:** on a real phone against the real bridge, power, mode, fan,
+setpoint, zone power and damper all work. A change made from the wall console
+shows up live. Background/foreground reconnects.
+
+### M3 — Settings · General
+- Source: `Settings.tsx`, `useTheme.ts`, `ThemeProvider.tsx`.
+- Endpoints: `GET /api/health`, `GET /api/state`, `PATCH /api/account/preferences`.
+- Account (username, sign out), theme (system / light / dark, stored on the
+  device), bridge status (connected, last update, console host, bridge
+  address), default room picker.
+
+**Done when:** all three web sections are present and the default room
+persists on the bridge.
+
+### M4 — Aircon · Timers
+- Source: `Schedules.tsx` (~960 lines: list + form + run history), `schedulesApi.ts`.
+- Endpoints: `GET/POST /api/schedules`, `PATCH/DELETE /api/schedules/:id`,
+  `POST /api/schedules/:id/run`, `GET /api/schedules/:id/runs`.
+- List with enable switch and next-run text. Create/edit in a formSheet:
+  name, start-day bitmask (presets: every day / weekdays / weekends), start and
+  stop time, rooms, and optional mode, fan and setpoint limited to the unit's
+  ability. Delete with confirm. Start now / Stop now, and run history.
+
+**Done when:** a timer created on the phone fires on the bridge. Edit, delete
+and run-now all match the web.
+
+### M5 — House · Groceries
+- Source: `Checklist.tsx`, `checklistApi.ts`.
+- Endpoints: `GET /api/checklists`, `GET/POST /api/checklists/:id/items`,
+  `PATCH/DELETE /api/checklists/:id/items/:itemId`.
+- Add item, tick/untick, swipe to delete, pull to refresh, refetch on focus
+  and foreground so two people shopping stay in sync.
+
+**Done when:** a change on one phone shows on another after refresh or refocus.
+
+### M6 — House · Dinner
+- Source: `DineMenu.tsx`, `DishLibrary.tsx`, `dineApi.ts`.
+- Endpoints: `GET/POST /api/dishes`, `PATCH/DELETE /api/dishes/:id`,
+  `GET /api/dinner-menu[?week=]`, `PATCH /api/dinner-menu/:weekStart/days/:dayOffset`.
+- **This week:** 7 days Mon–Sun, a dish picker plus notes (saved on blur). Show
+  who set each, with dish and notes attributed separately. Page back through
+  past weeks; forward stops at the current week.
+- **Dishes:** add, rename, remove. A duplicate name shows the 409 message.
+  Removed dishes show as `(removed)` in past weeks.
+
+**Done when:** it matches the web for current and past weeks and for every
+dish library action.
+
+### M7 — Activity · Rooms & Timeline
+- Source: `Activity.tsx`, `ActivityRooms.tsx`, `ActivityTimeline.tsx`, `runtimeApi.ts`, `useRuntime.ts`.
+- Endpoint: `GET /api/zone-runtime` (`preset=today|7d|30d|all`, `from`, `to`,
+  `zone`, `limit`, `offset`).
+- Per-room totals; a paginated session timeline with attribution (user /
+  timer / external) and config snapshots. Add a "load more" or infinite list
+  for pagination.
+
+**Done when:** the totals and sessions match the web for each preset and room
+filter.
+
+### M8 — Energy: Activity · Costs + Settings · Energy plan
+- Source: `ActivityCosts.tsx`, `SettingsPlan.tsx`, `EnergyBillForm.tsx`, `energyApi.ts`.
+- Endpoints: `GET /api/energy/costs`, `GET/POST /api/energy/bills`,
+  `PUT/DELETE /api/energy/bills/:id`.
+- Costs: monthly totals, forecast with the ±8% band, and the 3-hour runtime
+  profile. Bars are plain Views. Refresh every 60 s while focused.
+- Plan: bill list, then a bill form in a formSheet. The form has rate periods
+  (add a second one), optional exact charges, discount, adjustments and
+  date pickers. Money is integer cents, rates are dollars. Show the server's
+  400 reconciliation errors inline.
+
+**Done when:** a bill entered on the phone reconciles to the cent and shows up
+in Costs exactly as on the web.
+
+### M9 — Release
+- EAS: `eas.json` with development / preview / production profiles, and a
+  development build if any module added native code.
+- Final name, icon and splash. Android cleartext / iOS local-network config if
+  LAN `http` is supported (§2.1).
+- Distribution: internal (TestFlight / internal track or ad-hoc APK), since this
+  is a household app. OTA updates via `eas update`.
+
+**Done when:** installed from a build (not Expo Go) on every household phone.
+
+---
+
+## 4. How each module is done
+
+1. Read the source files listed for the module, and the bridge handlers for its
+   endpoints (`src/server/http.ts`, `src/energy/http.ts`).
+2. Check the SDK 58 docs (`https://docs.expo.dev/versions/v58.0.0/`) for any
+   Expo/RN API touched. Install only with `npx expo install`.
+3. Port: types and helpers first, then hooks, then screens.
+4. `npx expo lint` and `npx tsc --noEmit` are clean.
+5. Test on a real phone against the real bridge (the hardware matters: the
+   console allows only a few connections, and its zones have no sensors).
+6. Tick the module in the tracker below and commit.
+
+## 5. Tracker
+
+| # | Module | Status |
+| --- | --- | --- |
+| M0 | Foundation | ✅ (Android verified; iOS unchecked) |
+| M1 | Connect & sign in | ☐ |
+| M2 | Aircon · Now | ☐ |
+| M3 | Settings · General | ☐ |
+| M4 | Aircon · Timers | ☐ |
+| M5 | House · Groceries | ☐ |
+| M6 | House · Dinner | ☐ |
+| M7 | Activity · Rooms & Timeline | ☐ |
+| M8 | Energy (Costs + Plan) | ☐ |
+| M9 | Release | ☐ |
+
+## 6. Open questions
+
+1. **App name/identity:** keep `blueberry-mobile`, or rename to Home / HMS?
+   This affects the bundle id, scheme and icon, and is cheapest to settle in M0.
+2. **Bridge address:** Tailscale HTTPS only, or also plain LAN `http`? LAN
+   adds the cleartext and local-network config work in M9.
+3. **Design:** match the web's look exactly (the Bridge design, see
+   `Home Aircon Bridge.html`), or use native iOS/Android controls where they
+   differ?
+4. **Push notifications** (e.g. "timer failed", "bridge offline"): not in the
+   web app, so out of scope unless wanted. Adding them would need bridge changes.
