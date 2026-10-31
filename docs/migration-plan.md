@@ -263,6 +263,24 @@ shows up live. Background/foreground reconnects.
 **Done when:** all three web sections are present and the default room
 persists on the bridge.
 
+**Notes (built 2026-10-31):**
+- Live state now comes from a `SystemStateProvider` around the tabs (the web's
+  Dashboard), so Aircon and Settings share one socket and the default room is
+  resolved and saved once.
+- Theme: `src/lib/theme-preference.ts` stores the choice on the phone and
+  applies it with `Appearance.setColorScheme`, which re-themes native views
+  too. It's applied before the first frame, so there's no flash. `@expo/ui`
+  hosts are given the app's scheme, since they otherwise follow the device's.
+- The default room uses the `@expo/ui` universal `Picker` (a native dropdown)
+  at a fixed width, as on the web.
+- Added a bridge **Address** row (on the phone you type it in yourself). The
+  web's footer and Sign out are kept. There's no console-host row and no
+  `/api/health` call, because the web doesn't show them either.
+- Tested on the Android emulator against the real console: the readouts
+  (Connected, last update ticking, 5 rooms, address), choosing a default room
+  (saved on the bridge, then restored), Dark applied at once and kept across a
+  cold relaunch, then System.
+
 ### M4 — Aircon · Timers
 - Source: `Schedules.tsx` (~960 lines: list + form + run history), `schedulesApi.ts`.
 - Endpoints: `GET/POST /api/schedules`, `PATCH/DELETE /api/schedules/:id`,
@@ -353,7 +371,7 @@ in Costs exactly as on the web.
 | M0 | Foundation | ✅ (Android verified; iOS unchecked) |
 | M1 | Connect & sign in | ✅ (Android verified; iOS unchecked) |
 | M2 | Aircon · Now | ✅ on Android, tested on the real console (iOS unchecked) |
-| M3 | Settings · General | ☐ |
+| M3 | Settings · General | ✅ (Android verified; iOS unchecked) |
 | M4 | Aircon · Timers | ☐ |
 | M5 | House · Groceries | ☐ |
 | M6 | House · Dinner | ☐ |

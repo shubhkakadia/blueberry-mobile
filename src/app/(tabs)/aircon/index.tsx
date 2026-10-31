@@ -8,15 +8,13 @@ import { Alert } from '@/components/ui/alert';
 import { Toast } from '@/components/ui/toast';
 import { climateTint, getClimateTheme, Gutter } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
-import { useSelectedZone } from '@/hooks/use-selected-zone';
 import { useSystemState } from '@/hooks/use-system-state';
 import { ThemeOverride } from '@/hooks/use-theme';
 import { isOn } from '@/lib/aircon';
 import { describeNextRun, schedulesApi } from '@/lib/schedules';
 
 export default function AirconScreen() {
-  const { state, mutate, error, pending, loading, dismissError } = useSystemState();
-  const room = useSelectedZone(state.zones);
+  const { state, mutate, error, pending, loading, dismissError, room } = useSystemState();
   const nextTimer = useNextTimer();
   const scheme = useColorScheme() === 'dark' ? 'dark' : 'light';
 

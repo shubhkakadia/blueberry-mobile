@@ -14,8 +14,11 @@ import { useEffect } from 'react';
 import { FontFamily, navigationTheme } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { AuthProvider, useAuth } from '@/lib/auth';
+import { applyThemePreference, loadThemePreference } from '@/lib/theme-preference';
 
 SplashScreen.preventAutoHideAsync();
+// Before the first frame, so a chosen scheme never flashes the other one.
+applyThemePreference(loadThemePreference());
 
 /** Every weight the design uses, from the 200 of the setpoint numeral to the 700 of a badge. */
 const FONTS = [

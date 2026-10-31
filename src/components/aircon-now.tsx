@@ -8,6 +8,7 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { SkeletonBlock } from '@/components/ui/skeleton';
 import { climateIcon, Icons, type IconName } from '@/constants/icons';
 import { getClimateTheme, Radius, Type, type ClimateTheme } from '@/constants/theme';
+import { useColorScheme } from '@/hooks/use-color-scheme';
 import {
   patchAc,
   patchMainPower,
@@ -311,6 +312,8 @@ function ModeAndFan({ ac, ability, mutate }: { ac: AcState; ability: AcAbility |
  */
 function RoomRow({ zone, mutate, first }: { zone: ZoneState; mutate: Mutate; first: boolean }) {
   const theme = useTheme();
+  // Native hosts follow the device's scheme unless told the app's.
+  const scheme = useColorScheme() === 'dark' ? 'dark' : 'light';
   const on = isOn(zone.power);
 
   const commitPercentage = useCallback(
@@ -354,6 +357,7 @@ function RoomRow({ zone, mutate, first }: { zone: ZoneState; mutate: Mutate; fir
         </ThemedText>
         <Host
           matchContents={{ vertical: true }}
+          colorScheme={scheme}
           seedColor={theme.accent}
           accessibilityLabel={`${zone.name} damper`}
           style={styles.flex}>

@@ -12,6 +12,7 @@ export function useSelectedZone(zones: ZoneState[]) {
   const { selectedZoneNumber } = useUser();
   const { selectRoom } = useAuth();
   const [error, setError] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
   const effective = resolveSelectedZoneNumber(zones, selectedZoneNumber);
 
   useEffect(() => {
@@ -19,5 +20,14 @@ export function useSelectedZone(zones: ZoneState[]) {
     selectRoom(effective).catch((e: Error) => setError(e.message));
   }, [effective, selectedZoneNumber, selectRoom]);
 
-  return { selectedZoneNumber: effective, error, dismissError: () => setError(null) };
+  /** The Settings picker: shown at once, and a warning if the bridge did not keep it. */
+  const choose = (zoneNumber: number) => {
+    setError(null);
+    setSaving(true);
+    selectRoom(zoneNumber)
+      .catch((e: Error) => setError(e.message))
+      .finally(() => setSaving(false));
+  };
+
+  return { selectedZoneNumber: effective, error, saving, choose, dismissError: () => setError(null) };
 }

@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { createContext, use, useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { AppState } from 'react-native';
 
+import { useSelectedZone } from '@/hooks/use-selected-zone';
 import { airconApi, isOn, subscribe, type AcState, type SystemState } from '@/lib/aircon';
 
 const EMPTY: SystemState = { zones: [], acs: [], abilities: [], connected: false, lastUpdated: null };
@@ -19,7 +20,7 @@ type Patch = (state: SystemState) => SystemState;
  * state replaces the base and the patch drops in the same batch, so there is no
  * intermediate render. On failure the patch drops and the control reverts on its own.
  */
-export function useSystemState() {
+function useSystemStateSource() {
   const [server, setServer] = useState<SystemState>(EMPTY);
   const [patches, setPatches] = useState<ReadonlyMap<number, Patch>>(new Map());
   const [error, setError] = useState<string | null>(null);
@@ -100,7 +101,27 @@ export function useSystemState() {
   };
 }
 
-export type Mutate = ReturnType<typeof useSystemState>['mutate'];
+export type Mutate = ReturnType<typeof useSystemStateSource>['mutate'];
+
+type SystemStateValue = ReturnType<typeof useSystemStateSource> & { room: ReturnType<typeof useSelectedZone> };
+
+const SystemStateContext = createContext<SystemStateValue | null>(null);
+
+/**
+ * One live state for every tab - the web's Dashboard - so Aircon and Settings
+ * share a single socket, and the default room is resolved and saved once.
+ */
+export function SystemStateProvider({ children }: { children: ReactNode }) {
+  const source = useSystemStateSource();
+  const room = useSelectedZone(source.state.zones);
+  return <SystemStateContext value={{ ...source, room }}>{children}</SystemStateContext>;
+}
+
+export function useSystemState(): SystemStateValue {
+  const value = use(SystemStateContext);
+  if (!value) throw new Error('useSystemState must be used inside SystemStateProvider');
+  return value;
+}
 
 /** `The console didn't accept Study damper 70%, so it's been set back.` */
 function describeRefusal(reason: string, label?: string): string {
