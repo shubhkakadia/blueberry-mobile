@@ -396,6 +396,29 @@ dish library action.
 **Done when:** the totals and sessions match the web for each preset and room
 filter.
 
+**Notes (built 2026-10-31):**
+- `RuntimeProvider` (`src/hooks/use-runtime.tsx`) wraps the Activity stack and
+  owns the range and room filter, as the web's `Activity` does. Rooms
+  (`/activity`) and Timeline (`/activity/timeline`) read the same period, and
+  the filter is a modal route (`/activity/filter`) with a room picker and
+  `DateField`s. Costs (`/activity/costs`) is a placeholder until M8.
+- `src/lib/runtime.ts` holds the web's types and helpers. Day keys and clock
+  times use `Intl` with the bridge's time zone via `formatToParts`, falling
+  back to the phone's clock. "Today" is taken from when the data arrived,
+  since lint rejects `Date.now()` during render.
+- The timeline tag colours (`tag*` tokens) now live in `theme.ts`.
+- Tested on the Android emulator against real history in the test bridge's
+  database (the M2 hardware run, 7 Hall segments): Rooms totals, bars and
+  "Who started it"; the Timeline's day heading, Adelaide clock times,
+  modes and tags; the room and custom-date filter, carried across segments;
+  "Show earlier" paging, checked with a temporary page size of 3; and Clear filters.
+- **Web quirk, ported as is:** `groupByDay` folds consecutive same-actor
+  segments of one room into a run, so a room repeats ("Hall, Hall, …"). It
+  also takes a run's length as its longest segment, so the day total (1 m)
+  can disagree with Rooms (2 m). Worth fixing in both apps together.
+- Not ported: bar grow-in, rolling numbers, the sliding range thumb, and the
+  room-reorder glide.
+
 ### M8 — Energy: Activity · Costs + Settings · Energy plan
 - Source: `ActivityCosts.tsx`, `SettingsPlan.tsx`, `EnergyBillForm.tsx`, `energyApi.ts`.
 - Endpoints: `GET /api/energy/costs`, `GET/POST /api/energy/bills`,
@@ -445,7 +468,7 @@ in Costs exactly as on the web.
 | M4 | Aircon · Timers | ✅ on Android (run-now untested on hardware; iOS unchecked) |
 | M5 | House · Groceries | ✅ (Android verified; iOS unchecked) |
 | M6 | House · Dinner | ✅ (Android verified; iOS unchecked) |
-| M7 | Activity · Rooms & Timeline | ☐ |
+| M7 | Activity · Rooms & Timeline | ✅ (Android verified; iOS unchecked) |
 | M8 | Energy (Costs + Plan) | ☐ |
 | M9 | Release | ☐ |
 

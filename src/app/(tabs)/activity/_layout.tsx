@@ -1,9 +1,21 @@
 import { Stack } from 'expo-router';
 
+import { RuntimeProvider } from '@/hooks/use-runtime';
+
 export default function ActivityLayout() {
   return (
-    <Stack screenOptions={{ headerLargeTitleEnabled: true, headerShadowVisible: false }}>
-      <Stack.Screen name="index" options={{ title: 'Activity' }} />
-    </Stack>
+    // Rooms and Timeline read one period; the filter edits it.
+    <RuntimeProvider>
+      <Stack screenOptions={{ headerLargeTitleEnabled: true, headerShadowVisible: false }}>
+        {/* Sections of one tab: switching swaps in place, as the web's segments do. */}
+        <Stack.Screen name="index" options={{ title: 'Activity', animation: 'none' }} />
+        <Stack.Screen name="timeline" options={{ title: 'Activity', animation: 'none' }} />
+        <Stack.Screen name="costs" options={{ title: 'Activity', animation: 'none' }} />
+        <Stack.Screen
+          name="filter"
+          options={{ title: 'Filter runtime', presentation: 'modal', headerLargeTitleEnabled: false }}
+        />
+      </Stack>
+    </RuntimeProvider>
   );
 }

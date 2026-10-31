@@ -65,6 +65,16 @@ export const Colors = {
     toastFg: '#ffffff',
     toastIcon: '#f2b48c',
 
+    /** Who started a session, on the timeline. */
+    tagUser: '#e1ecf6',
+    tagUserFg: '#0e3b63',
+    tagTimer: '#f6e5d9',
+    tagTimerFg: '#5e260b',
+    tagConsole: '#e7e6f4',
+    tagConsoleFg: '#26235a',
+    tagQuiet: '#e6eae7',
+    tagQuietFg: '#1d2e2a',
+
     shadowE1: '0 1px 2px rgba(20, 32, 42, 0.06)',
     shadowE2: '0 1px 2px rgba(14, 59, 99, 0.08), 0 12px 32px rgba(14, 59, 99, 0.08)',
     shadowSegment: '0 1px 2px rgba(20, 32, 42, 0.12)',
@@ -121,6 +131,15 @@ export const Colors = {
     toast: '#2a363f',
     toastFg: '#f2f5f7',
     toastIcon: '#f2b48c',
+
+    tagUser: '#16293a',
+    tagUserFg: '#b3d7f7',
+    tagTimer: '#2e1b10',
+    tagTimerFg: '#f6c7a9',
+    tagConsole: '#1e1d36',
+    tagConsoleFg: '#cfccf6',
+    tagQuiet: '#18221f',
+    tagQuietFg: '#c2ddd6',
 
     // A shadow does nothing on a near-black canvas, so the lift is a faint ring instead.
     shadowE1: '0 0 0 1px rgba(255, 255, 255, 0.045)',

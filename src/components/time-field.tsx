@@ -54,6 +54,71 @@ export function TimeField({ label, value, onChange }: { label: string; value: st
   );
 }
 
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+/** `YYYY-MM-DD` as local midnight, for the native picker. */
+function dayToDate(day: string): Date {
+  const [year, month, date] = day.split('-').map(Number);
+  return new Date(year ?? 1970, (month ?? 1) - 1, date ?? 1);
+}
+
+const toDay = (date: Date) =>
+  `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+
+/** A calendar day, `YYYY-MM-DD`, picked the same way as `TimeField`. */
+export function DateField({
+  label,
+  value,
+  onChange,
+  minimum,
+  maximum,
+}: {
+  label: string;
+  value: string;
+  onChange: (day: string) => void;
+  minimum?: string;
+  maximum?: string;
+}) {
+  const theme = useTheme();
+  const scheme = useColorScheme() === 'dark' ? 'dark' : 'light';
+  const date = dayToDate(value);
+  const shown = `${date.getDate()} ${MONTHS[date.getMonth()]} ${date.getFullYear()}`;
+  const bounds = {
+    ...(minimum ? { minimumDate: dayToDate(minimum) } : {}),
+    ...(maximum ? { maximumDate: dayToDate(maximum) } : {}),
+  };
+  const pick = (_: unknown, picked: Date) => onChange(toDay(picked));
+
+  return (
+    <Field label={label} style={styles.field}>
+      {Platform.OS === 'ios' ? (
+        <DateTimePicker
+          value={date}
+          mode="date"
+          display="compact"
+          accentColor={theme.accent}
+          themeVariant={scheme}
+          onValueChange={pick}
+          style={styles.ios}
+          {...bounds}
+        />
+      ) : (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={`${label}, ${shown}`}
+          onPress={() => DateTimePickerAndroid.open({ value: date, mode: 'date', onValueChange: pick, ...bounds })}
+          style={({ pressed }) => [
+            styles.box,
+            { borderColor: theme.border, backgroundColor: theme.surfaceField },
+            pressed && { borderColor: theme.accent },
+          ]}>
+          <ThemedText style={styles.tabular}>{shown}</ThemedText>
+        </Pressable>
+      )}
+    </Field>
+  );
+}
+
 const styles = StyleSheet.create({
   field: { flex: 1 },
   ios: { alignSelf: 'flex-start' },
