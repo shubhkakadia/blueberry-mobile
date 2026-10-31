@@ -293,6 +293,31 @@ persists on the bridge.
 **Done when:** a timer created on the phone fires on the bridge. Edit, delete
 and run-now all match the web.
 
+**Notes (built 2026-10-31):**
+- Routes: `/aircon` (Now) and `/aircon/timers` are sections of the Aircon
+  stack, switched by a `Segments` control (`src/components/segments.tsx`,
+  sections in `src/constants/sections.ts`). They replace each other without
+  animation. `/aircon/timers/[id]` (`new` or an id) is a modal form. Tapping
+  the "next timer" line on Now opens Timers.
+- `src/lib/schedules.ts` holds the web's whole API and helpers, including the
+  overlap finder, ported unchanged. `TimerCard`, `TimerForm` and `Chip`/`Tag`
+  follow the web's components.
+- Times use `@react-native-community/datetimepicker` (in Expo Go): Android's
+  clock dialog behind a field, iOS's compact inline picker. Deleting confirms
+  with a native alert. Pull-to-refresh uses `RefreshControl`.
+- Tested on the Android emulator through the test bridge (scratch DB; timers
+  never fired): create (name, both times through the clock dialog, Weekdays,
+  room, Fan, 22°), enable switch off and on, History, the overlap warning with
+  a second timer, edit (prefilled; only the name changed on save), delete with
+  confirmation, and validation blocking Save. Every write was checked against
+  the bridge's stored timer. Both test timers were deleted afterwards.
+- **Not tested:** Start now / Stop now. Start really turns the aircon on, so
+  it's left for a run you approve.
+- Not ported yet: the web's swipe-to-delete on a card (delete is in the
+  form), and its list and history animations. The form opens inside the tab,
+  so the tab bar stays visible under it; the web covers the whole app.
+  The iOS time picker is unchecked.
+
 ### M5 — House · Groceries
 - Source: `Checklist.tsx`, `checklistApi.ts`.
 - Endpoints: `GET /api/checklists`, `GET/POST /api/checklists/:id/items`,
@@ -372,7 +397,7 @@ in Costs exactly as on the web.
 | M1 | Connect & sign in | ✅ (Android verified; iOS unchecked) |
 | M2 | Aircon · Now | ✅ on Android, tested on the real console (iOS unchecked) |
 | M3 | Settings · General | ✅ (Android verified; iOS unchecked) |
-| M4 | Aircon · Timers | ☐ |
+| M4 | Aircon · Timers | ✅ on Android (run-now untested on hardware; iOS unchecked) |
 | M5 | House · Groceries | ☐ |
 | M6 | House · Dinner | ☐ |
 | M7 | Activity · Rooms & Timeline | ☐ |

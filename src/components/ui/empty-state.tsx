@@ -1,11 +1,22 @@
 import { SymbolView } from 'expo-symbols';
+import type { ReactNode } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import type { IconName } from '@/constants/icons';
 import { useTheme } from '@/hooks/use-theme';
 
-export function EmptyState({ icon, title, body }: { icon: IconName; title: string; body?: string }) {
+export function EmptyState({
+  icon,
+  title,
+  body,
+  action,
+}: {
+  icon: IconName;
+  title: string;
+  body?: string;
+  action?: ReactNode;
+}) {
   const theme = useTheme();
   return (
     <View style={styles.wrap}>
@@ -18,6 +29,7 @@ export function EmptyState({ icon, title, body }: { icon: IconName; title: strin
           {body}
         </ThemedText>
       )}
+      {action && <View style={styles.action}>{action}</View>}
     </View>
   );
 }
@@ -27,4 +39,5 @@ const styles = StyleSheet.create({
   badge: { width: 48, height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center', marginBottom: 4 },
   title: { fontWeight: '600', textAlign: 'center' },
   body: { maxWidth: 320, textAlign: 'center' },
+  action: { marginTop: 8 },
 });

@@ -35,10 +35,11 @@ interface Props {
   selectedZoneNumber: number | null;
   /** One line of automation - the next boundary - and nothing else. */
   nextTimer: NextTimer | null;
+  onOpenTimers: () => void;
 }
 
 /** Aircon · Now, ported from the web's `AirconNow.tsx`. Colours come from the climate override around it. */
-export function AirconNow({ state, mutate, loading, climate, selectedZoneNumber, nextTimer }: Props) {
+export function AirconNow({ state, mutate, loading, climate, selectedZoneNumber, nextTimer, onOpenTimers }: Props) {
   const theme = useTheme();
   if (loading) return <AirconSkeleton />;
 
@@ -62,13 +63,18 @@ export function AirconNow({ state, mutate, loading, climate, selectedZoneNumber,
       )}
 
       {nextTimer && (
-        <View style={[styles.nextTimer, { backgroundColor: theme.glass }]}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityHint="Opens the timers"
+          onPress={onOpenTimers}
+          style={({ pressed }) => [styles.nextTimer, { backgroundColor: theme.glass }, pressed && styles.pressedSoft]}>
           <SymbolView name={Icons.clock} size={20} tintColor={theme.accent} />
           <ThemedText type="body" style={styles.flex}>
             {nextTimer.name && <ThemedText type="body" style={styles.semibold}>{`${nextTimer.name} `}</ThemedText>}
             {nextTimer.when}
           </ThemedText>
-        </View>
+          <SymbolView name={Icons.chevronRight} size={18} tintColor={theme.fgMuted} />
+        </Pressable>
       )}
 
       <View style={styles.rooms}>
@@ -408,6 +414,7 @@ const styles = StyleSheet.create({
   disabled: { opacity: 0.4 },
   pressed: { transform: [{ scale: 0.94 }] },
   pressedDeep: { transform: [{ scale: 0.88 }] },
+  pressedSoft: { transform: [{ scale: 0.985 }] },
   caps: { fontSize: 12, lineHeight: 16, fontWeight: '600', letterSpacing: 0.84, textTransform: 'uppercase' },
 
   mainUnit: { gap: 12 },

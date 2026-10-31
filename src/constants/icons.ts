@@ -20,6 +20,11 @@ export const Icons = {
   plus: { ios: 'plus', android: 'add', web: 'add' },
   console: { ios: 'antenna.radiowaves.left.and.right', android: 'router', web: 'router' },
   house: { ios: 'house', android: 'home', web: 'home' },
+  pencil: { ios: 'pencil', android: 'edit', web: 'edit' },
+  trash: { ios: 'trash', android: 'delete', web: 'delete' },
+  sliders: { ios: 'slider.horizontal.3', android: 'tune', web: 'tune' },
+  chevronDown: { ios: 'chevron.down', android: 'expand_more', web: 'expand_more' },
+  chevronRight: { ios: 'chevron.right', android: 'chevron_right', web: 'chevron_right' },
   signOut: { ios: 'rectangle.portrait.and.arrow.right', android: 'logout', web: 'logout' },
 } satisfies Record<string, IconName>;
 

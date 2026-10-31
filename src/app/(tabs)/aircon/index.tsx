@@ -1,11 +1,13 @@
-import { Stack } from 'expo-router';
+import { router, Stack } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { AppState, ScrollView, StyleSheet, View } from 'react-native';
 
 import { AirconNow, type NextTimer } from '@/components/aircon-now';
 import { ConnectionPill } from '@/components/connection-pill';
+import { Segments } from '@/components/segments';
 import { Alert } from '@/components/ui/alert';
 import { Toast } from '@/components/ui/toast';
+import { AIRCON_SECTIONS } from '@/constants/sections';
 import { climateTint, getClimateTheme, Gutter } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useSystemState } from '@/hooks/use-system-state';
@@ -39,6 +41,7 @@ export default function AirconScreen() {
       />
       <View style={[styles.page, { backgroundColor: tint.page }]}>
         <ScrollView contentInsetAdjustmentBehavior="automatic" contentContainerStyle={styles.content}>
+          <Segments items={AIRCON_SECTIONS} selected={0} />
           {room.error && (
             <Alert tone="warning" title="Your default room wasn't saved." onDismiss={room.dismissError} style={styles.alert}>
               {room.error}
@@ -51,6 +54,7 @@ export default function AirconScreen() {
             climate={climate}
             selectedZoneNumber={room.selectedZoneNumber}
             nextTimer={nextTimer}
+            onOpenTimers={() => router.replace('/aircon/timers')}
           />
         </ScrollView>
         {error && (
