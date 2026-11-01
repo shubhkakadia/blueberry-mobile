@@ -61,7 +61,7 @@
     },
     "owner": "cabipro-software",
     "runtimeVersion": {
-      "policy": "appVersion"
+      "policy": "fingerprint"
     },
     "updates": {
       "url": "https://u.expo.dev/85aefe3a-70dd-44bd-930b-e004b99e4f0a"

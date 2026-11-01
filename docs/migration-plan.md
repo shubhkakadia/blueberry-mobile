@@ -509,10 +509,10 @@ in Costs exactly as on the web.
   `production` makes store builds, with build numbers kept remotely by EAS and
   incremented on each build. No development profile: nothing native was added
   beyond Expo Go's modules, so Expo Go is still the dev client.
-- `expo-updates` with `runtimeVersion: { policy: "appVersion" }`. JS-only fixes
-  ship with `eas update --channel production --environment production -m "…"`;
-  bump `version` in `app.json` whenever native code changes, so old builds never
-  get an update they can't run.
+- `expo-updates` with `runtimeVersion: { policy: "fingerprint" }`, so old builds
+  never get an update they can't run, without anyone having to raise `version`.
+  JS-only fixes ship with
+  `eas update --channel production --environment production -m "…"`.
 - Icon and splash: a blueberry with its star crown in the app's blues, drawn by
   a script; the adaptive icon has a monochrome layer for themed icons.
   The template icons, including the `.icon` bundle, are gone. `ios.config.usesNonExemptEncryption: false`
@@ -532,8 +532,7 @@ in Costs exactly as on the web.
   of them. Applies from the next build.
 - Automated releases: [`expo-release-setup.md`](expo-release-setup.md) connects
   both stores to Expo, so a push to `master` builds and submits or publishes an
-  update. Not set up yet. It replaces the version-bump rule above with the
-  `fingerprint` runtime policy.
+  update. Not set up yet.
 - Store publishing: [`store-setup.md`](store-setup.md) is the step-by-step
   guide (Play internal testing and TestFlight internal recommended).
   [`privacy-policy.md`](privacy-policy.md) is the draft policy for

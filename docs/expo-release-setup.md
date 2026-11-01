@@ -41,9 +41,9 @@ release stays a manual step in each store's console.
 
 ---
 
-## Part 0: Tie updates to the native code 🤖
+## Part 0: Tie updates to the native code ✅
 
-Do this **before the first production build**. In `app.json`:
+Done. `app.json` uses this, ready for the first production build:
 
 ```json
 "runtimeVersion": {
@@ -51,7 +51,7 @@ Do this **before the first production build**. In `app.json`:
 }
 ```
 
-Today's `appVersion` policy relies on someone remembering to raise the version
+The earlier `appVersion` policy relied on someone remembering to raise the version
 whenever native code changes. If that's forgotten, installed apps can download
 an update that calls native code they don't have. With `fingerprint`, an update
 only ever reaches builds it matches. The workflow in Part 3 also makes its
@@ -361,7 +361,7 @@ per platform.
 
 ## Checklist
 
-- [ ] Part 0 Runtime policy switched to `fingerprint`
+- [x] Part 0 Runtime policy switched to `fingerprint`
 - [ ] 1.1 Service account and JSON key created
 - [ ] 1.2 Service account invited in Play Console
 - [ ] 1.3 Key stored in Expo
