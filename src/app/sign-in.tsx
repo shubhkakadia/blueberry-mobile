@@ -1,6 +1,5 @@
-import { SymbolView } from 'expo-symbols';
 import { useRef, useState } from 'react';
-import { KeyboardAvoidingView, ScrollView, StyleSheet, View, type TextInputInstance } from 'react-native';
+import { Image, KeyboardAvoidingView, ScrollView, StyleSheet, View, type TextInputInstance } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -10,7 +9,6 @@ import { Button } from '@/components/ui/button';
 import { Field } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { riseIn } from '@/components/ui/motion';
-import { Icons } from '@/constants/icons';
 import { climateTint, getClimateTheme, Radius } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useTheme } from '@/hooks/use-theme';
@@ -61,12 +59,15 @@ export default function SignInScreen() {
         <SafeAreaView style={styles.fill}>
           <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
             <View style={styles.intro}>
-              <View style={[styles.mark, { backgroundColor: tint.deep }]}>
-                <SymbolView name={Icons.cool} size={28} tintColor={theme.surface} />
-              </View>
+              {/* The app icon itself; its tile is the page's own tint, so a shadow draws the edge. */}
+              <Image
+                source={require('@/assets/images/icon.png')}
+                accessibilityIgnoresInvertColors
+                style={[styles.mark, { boxShadow: theme.shadowE2 }]}
+              />
               <View style={styles.introText}>
                 <ThemedText accessibilityRole="header" style={styles.title}>
-                  Bridge
+                  Blueberry
                 </ThemedText>
                 <ThemedText themeColor="fgBody" style={styles.lede}>
                   The aircon, the timers, the shopping and dinner — for everyone at home.
@@ -180,7 +181,7 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
   },
   intro: { gap: 20 },
-  mark: { width: 56, height: 56, borderRadius: Radius.row, alignItems: 'center', justifyContent: 'center' },
+  mark: { width: 56, height: 56, borderRadius: Radius.row },
   introText: { gap: 8 },
   title: { fontSize: 40, lineHeight: 42, fontWeight: '600', letterSpacing: -1.2 },
   lede: { fontSize: 17, lineHeight: 25, maxWidth: 300 },
