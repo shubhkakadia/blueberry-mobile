@@ -1,11 +1,13 @@
 import { router, Stack } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { AppState, ScrollView, StyleSheet, View } from 'react-native';
+import Animated from 'react-native-reanimated';
 
 import { AirconNow, type NextTimer } from '@/components/aircon-now';
 import { ConnectionPill } from '@/components/connection-pill';
 import { Segments } from '@/components/segments';
 import { Alert } from '@/components/ui/alert';
+import { easeChanges } from '@/components/ui/motion';
 import { Toast } from '@/components/ui/toast';
 import { AIRCON_SECTIONS } from '@/constants/sections';
 import { climateTint, getClimateTheme, Gutter } from '@/constants/theme';
@@ -39,7 +41,7 @@ export default function AirconScreen() {
           ),
         }}
       />
-      <View style={[styles.page, { backgroundColor: tint.page }]}>
+      <Animated.View style={[styles.page, easeChanges, { backgroundColor: tint.page }]}>
         <ScrollView contentInsetAdjustmentBehavior="automatic" contentContainerStyle={styles.content}>
           <Segments items={AIRCON_SECTIONS} selected={0} />
           {room.error && (
@@ -62,7 +64,7 @@ export default function AirconScreen() {
             <Toast message={error} onDismiss={dismissError} />
           </View>
         )}
-      </View>
+      </Animated.View>
     </ThemeOverride>
   );
 }

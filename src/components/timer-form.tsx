@@ -1,6 +1,6 @@
 import { router, Stack } from 'expo-router';
 import { useState, type ReactNode } from 'react';
-import { Alert as Dialog, KeyboardAvoidingView, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Alert as Dialog, KeyboardAvoidingView, ScrollView, StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { TimeField } from '@/components/time-field';
@@ -10,6 +10,7 @@ import { Card } from '@/components/ui/card';
 import { Chip, ChipRow } from '@/components/ui/chip';
 import { Field } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
+import { Pressable } from '@/components/ui/pressable';
 import { Icons } from '@/constants/icons';
 import { getClimateTheme, Gutter } from '@/constants/theme';
 import { useSystemState } from '@/hooks/use-system-state';

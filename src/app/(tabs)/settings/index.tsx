@@ -1,12 +1,16 @@
-import { Host, Picker } from '@expo/ui';
+import { Host } from '@expo/ui';
 import { useEffect, useState, type ReactNode } from 'react';
-import { Pressable, ScrollView, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
+import { ScrollView, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
+import Animated from 'react-native-reanimated';
 
 import { Segments } from '@/components/segments';
 import { ThemedText } from '@/components/themed-text';
 import { Alert } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { easeChanges } from '@/components/ui/motion';
+import { Picker } from '@/components/ui/picker';
+import { Pressable } from '@/components/ui/pressable';
 import { Icons } from '@/constants/icons';
 import { SETTINGS_SECTIONS } from '@/constants/sections';
 import { Gutter, Radius } from '@/constants/theme';
@@ -133,7 +137,7 @@ export default function SettingsScreen() {
         <Card padding="list">
           <Readout label="Status">
             <View style={styles.status}>
-              <View style={[styles.dot, { backgroundColor: state.connected ? theme.positiveDot : theme.danger }]} />
+              <Animated.View style={[styles.dot, easeChanges, { backgroundColor: state.connected ? theme.positiveDot : theme.danger }]} />
               <ThemedText type="body" style={[styles.semibold, { color: state.connected ? theme.positive : theme.danger }]}>
                 {state.connected ? 'Connected' : 'Offline'}
               </ThemedText>
@@ -235,7 +239,7 @@ const styles = StyleSheet.create({
   segments: { flexDirection: 'row', gap: 4, padding: 4, borderRadius: Radius.row },
   segment: { flex: 1, minHeight: 48, borderRadius: Radius.button, alignItems: 'center', justifyContent: 'center' },
   // A fixed width, as on the web; Android's dropdown otherwise takes the whole row.
-  picker: { width: 160 },
+  picker: { width: 184 },
   status: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   dot: { width: 9, height: 9, borderRadius: 4.5 },
   value: { flexShrink: 1, textAlign: 'right', fontVariant: ['tabular-nums'] },

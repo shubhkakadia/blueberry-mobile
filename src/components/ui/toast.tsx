@@ -1,9 +1,10 @@
 import { SymbolView } from 'expo-symbols';
-import { Pressable, StyleSheet } from 'react-native';
+import { StyleSheet } from 'react-native';
 import Animated from 'react-native-reanimated';
 
 import { ThemedText } from '@/components/themed-text';
 import { riseIn, sinkOut } from '@/components/ui/motion';
+import { Pressable } from '@/components/ui/pressable';
 import { Icons } from '@/constants/icons';
 import { Radius } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';

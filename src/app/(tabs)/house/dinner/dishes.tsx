@@ -1,6 +1,7 @@
 import { useFocusEffect } from 'expo-router';
 import { useCallback, useRef, useState } from 'react';
 import { Alert as Dialog, KeyboardAvoidingView, ScrollView, StyleSheet, View } from 'react-native';
+import Animated from 'react-native-reanimated';
 
 import { DinnerViews } from '@/components/dinner-views';
 import { ThemedText } from '@/components/themed-text';
@@ -8,6 +9,7 @@ import { Alert } from '@/components/ui/alert';
 import { Button, IconButton } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Input } from '@/components/ui/input';
+import { easeChanges, fadeOut, riseIn, settle } from '@/components/ui/motion';
 import { SkeletonBlock } from '@/components/ui/skeleton';
 import { Icons } from '@/constants/icons';
 import { Gutter, Radius } from '@/constants/theme';
@@ -158,12 +160,17 @@ export default function DishesScreen() {
             />
           </View>
         ) : (
-          <View style={[styles.panel, { backgroundColor: theme.surface, boxShadow: theme.shadowE1 }]}>
+          <Animated.View layout={settle} style={[styles.panel, { backgroundColor: theme.surface, boxShadow: theme.shadowE1 }]}>
             {dishes.map((dish, index) => {
               const busy = busyId === dish.id;
               const divider = index > 0 && { borderTopWidth: 1, borderColor: theme.hairline };
               return editingId === dish.id ? (
-                <View key={dish.id} style={[styles.row, styles.editRow, divider]}>
+                <Animated.View
+                  key={dish.id}
+                  entering={riseIn}
+                  exiting={fadeOut}
+                  layout={settle}
+                  style={[styles.row, styles.editRow, divider]}>
                   <Input
                     autoFocus
                     value={editDraft}
@@ -181,9 +188,14 @@ export default function DishesScreen() {
                   <Button variant="ghost" size="md" disabled={busy} onPress={() => setEditingId(null)}>
                     Cancel
                   </Button>
-                </View>
+                </Animated.View>
               ) : (
-                <View key={dish.id} style={[styles.row, divider, busy && styles.busy]}>
+                <Animated.View
+                  key={dish.id}
+                  entering={riseIn}
+                  exiting={fadeOut}
+                  layout={settle}
+                  style={[styles.row, easeChanges, divider, busy && styles.busy]}>
                   <ThemedText style={[styles.fill, styles.medium]}>{dish.name}</ThemedText>
                   <IconButton
                     icon={Icons.pencil}
@@ -200,10 +212,10 @@ export default function DishesScreen() {
                     disabled={busyId !== null}
                     onPress={() => confirmRemove(dish)}
                   />
-                </View>
+                </Animated.View>
               );
             })}
-          </View>
+          </Animated.View>
         )}
 
         <ThemedText type="meta" themeColor="fgMuted" style={styles.footer}>

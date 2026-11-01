@@ -1,8 +1,9 @@
 import { router } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
+import { Pressable } from '@/components/ui/pressable';
 import { Icons } from '@/constants/icons';
 import { useRuntime } from '@/hooks/use-runtime';
 import { useTheme } from '@/hooks/use-theme';

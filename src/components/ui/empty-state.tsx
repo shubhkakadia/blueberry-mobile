@@ -1,8 +1,10 @@
 import { SymbolView } from 'expo-symbols';
 import type { ReactNode } from 'react';
 import { StyleSheet, View } from 'react-native';
+import Animated from 'react-native-reanimated';
 
 import { ThemedText } from '@/components/themed-text';
+import { riseIn } from '@/components/ui/motion';
 import type { IconName } from '@/constants/icons';
 import { useTheme } from '@/hooks/use-theme';
 
@@ -19,7 +21,7 @@ export function EmptyState({
 }) {
   const theme = useTheme();
   return (
-    <View style={styles.wrap}>
+    <Animated.View entering={riseIn} style={styles.wrap}>
       <View style={[styles.badge, { backgroundColor: theme.surfaceInset }]}>
         <SymbolView name={icon} size={24} tintColor={theme.fgMuted} />
       </View>
@@ -30,7 +32,7 @@ export function EmptyState({
         </ThemedText>
       )}
       {action && <View style={styles.action}>{action}</View>}
-    </View>
+    </Animated.View>
   );
 }
 

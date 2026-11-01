@@ -9,15 +9,18 @@ import {
 import { useFonts } from 'expo-font';
 import { Stack, ThemeProvider } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
+import * as SystemUI from 'expo-system-ui';
 import { useEffect } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
-import { FontFamily, navigationTheme } from '@/constants/theme';
+import { crossfade } from '@/components/ui/motion';
+import { Colors, FontFamily, navigationTheme } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { AuthProvider, useAuth } from '@/lib/auth';
 import { applyThemePreference, loadThemePreference } from '@/lib/theme-preference';
 
 SplashScreen.preventAutoHideAsync();
+SplashScreen.setOptions({ fade: true });
 // Before the first frame, so a chosen scheme never flashes the other one.
 applyThemePreference(loadThemePreference());
 
@@ -59,12 +62,17 @@ function RootNavigator() {
     if (ready) SplashScreen.hideAsync();
   }, [ready]);
 
+  // The window shows between screens and through a fading one, and it is white unless told otherwise.
+  useEffect(() => {
+    void SystemUI.setBackgroundColorAsync(Colors[scheme].canvas);
+  }, [scheme]);
+
   if (!ready) return null;
 
   return (
     <ThemeProvider value={navigationTheme(scheme)}>
-      {/* Signing in or out swaps the whole app at once, as the web does. */}
-      <Stack screenOptions={{ headerShown: false, animation: 'none' }}>
+      {/* Signing in or out swaps the whole app at once. */}
+      <Stack screenOptions={{ headerShown: false, ...crossfade }}>
         <Stack.Protected guard={!!user}>
           <Stack.Screen name="(tabs)" />
           <Stack.Screen name="index" />

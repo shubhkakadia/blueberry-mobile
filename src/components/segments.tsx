@@ -1,7 +1,8 @@
 import { router, type Href } from 'expo-router';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
+import { Pressable } from '@/components/ui/pressable';
 import { Radius } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 

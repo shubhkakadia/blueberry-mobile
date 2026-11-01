@@ -1,4 +1,5 @@
-import { View, type ViewProps } from 'react-native';
+import type { ComponentProps } from 'react';
+import Animated from 'react-native-reanimated';
 
 import { Radius } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
@@ -24,7 +25,7 @@ const PADDING = {
   hero: { padding: 20 },
 } as const;
 
-export type CardProps = ViewProps & {
+export type CardProps = ComponentProps<typeof Animated.View> & {
   level?: keyof typeof LEVEL;
   padding?: keyof typeof PADDING;
 };
@@ -33,7 +34,7 @@ export type CardProps = ViewProps & {
 export function Card({ level = 'panel', padding = 'md', style, ...rest }: CardProps) {
   const theme = useTheme();
   return (
-    <View
+    <Animated.View
       {...rest}
       style={[
         { backgroundColor: theme.surface, boxShadow: theme.shadowE1, borderRadius: LEVEL[level] },

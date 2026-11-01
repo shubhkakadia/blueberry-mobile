@@ -1,4 +1,4 @@
-import { Host, Picker } from '@expo/ui';
+import { Host } from '@expo/ui';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
@@ -7,6 +7,7 @@ import { DateField } from '@/components/time-field';
 import { ThemedText } from '@/components/themed-text';
 import { Button } from '@/components/ui/button';
 import { Field } from '@/components/ui/field';
+import { Picker } from '@/components/ui/picker';
 import { Gutter } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useRuntime } from '@/hooks/use-runtime';

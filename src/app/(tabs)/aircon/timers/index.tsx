@@ -1,6 +1,7 @@
 import { router, Stack, useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
+import Animated from 'react-native-reanimated';
 
 import { Segments } from '@/components/segments';
 import { ThemedText } from '@/components/themed-text';
@@ -9,6 +10,7 @@ import { Alert } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { EmptyState } from '@/components/ui/empty-state';
+import { settle } from '@/components/ui/motion';
 import { SkeletonBlock } from '@/components/ui/skeleton';
 import { Icons } from '@/constants/icons';
 import { AIRCON_SECTIONS } from '@/constants/sections';
@@ -130,9 +132,10 @@ export default function TimersScreen() {
               }
             />
           ) : (
-            schedules.map((schedule) => (
+            schedules.map((schedule, index) => (
               <TimerCard
                 key={schedule.id}
+                index={index}
                 schedule={schedule}
                 zoneNames={state.zones.filter((zone) => schedule.zones.includes(zone.number)).map((zone) => zone.name)}
                 onToggle={() => guard(() => schedulesApi.update(schedule.id, { enabled: !schedule.enabled }))}
@@ -142,10 +145,12 @@ export default function TimersScreen() {
             ))
           )}
 
-          <ThemedText type="meta" themeColor="fgMuted" style={styles.footer}>
-            {timeZone ? `Times follow ${timeZone} time. ` : ''}A timer that ends before it starts runs overnight and
-            stops the next day.
-          </ThemedText>
+          <Animated.View layout={settle}>
+            <ThemedText type="meta" themeColor="fgMuted" style={styles.footer}>
+              {timeZone ? `Times follow ${timeZone} time. ` : ''}A timer that ends before it starts runs overnight and
+              stops the next day.
+            </ThemedText>
+          </Animated.View>
         </View>
       </ScrollView>
     </>

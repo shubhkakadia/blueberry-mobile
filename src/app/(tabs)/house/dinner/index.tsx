@@ -1,6 +1,7 @@
 import { useFocusEffect } from 'expo-router';
 import { useCallback, useRef, useState } from 'react';
-import { AppState, KeyboardAvoidingView, Pressable, RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
+import { AppState, KeyboardAvoidingView, RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
+import Animated from 'react-native-reanimated';
 
 import { DayCard } from '@/components/day-card';
 import { DinnerViews } from '@/components/dinner-views';
@@ -8,6 +9,8 @@ import { Segments } from '@/components/segments';
 import { ThemedText } from '@/components/themed-text';
 import { Alert } from '@/components/ui/alert';
 import { IconButton } from '@/components/ui/button';
+import { easeChanges } from '@/components/ui/motion';
+import { Pressable } from '@/components/ui/pressable';
 import { SkeletonBlock } from '@/components/ui/skeleton';
 import { Icons } from '@/constants/icons';
 import { HOUSE_SECTIONS } from '@/constants/sections';
@@ -199,7 +202,7 @@ export default function DinnerWeekScreen() {
                 />
               </View>
 
-              <View style={[styles.stack, paging && styles.paging]}>
+              <Animated.View style={[styles.stack, easeChanges, paging && styles.paging]}>
                 {week.days.map((day) => {
                   const key = `${week.weekStartDate}:${day.dayOffset}`;
                   return (
@@ -217,7 +220,7 @@ export default function DinnerWeekScreen() {
                     />
                   );
                 })}
-              </View>
+              </Animated.View>
             </>
           )}
         </View>

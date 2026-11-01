@@ -4,7 +4,7 @@
     "slug": "blueberry",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/blueberry-icon.png",
     "scheme": "blueberrymobile",
     "userInterfaceStyle": "automatic",
     "ios": {
@@ -17,8 +17,8 @@
       "package": "com.blueberrymandal.app",
       "adaptiveIcon": {
         "backgroundColor": "#DCEBF5",
-        "foregroundImage": "./assets/images/android-icon-foreground.png",
-        "monochromeImage": "./assets/images/android-icon-monochrome.png"
+        "foregroundImage": "./assets/images/blueberry-adaptive-foreground.png",
+        "monochromeImage": "./assets/images/blueberry-adaptive-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
       "blockedPermissions": [
@@ -31,7 +31,7 @@
     },
     "web": {
       "output": "single",
-      "favicon": "./assets/images/favicon.png"
+      "favicon": "./assets/images/blueberry-favicon.png"
     },
     "plugins": [
       "expo-router",
@@ -39,11 +39,11 @@
         "expo-splash-screen",
         {
           "backgroundColor": "#F3F4F1",
-          "image": "./assets/images/splash-icon.png",
+          "image": "./assets/images/blueberry-splash.png",
           "imageWidth": 120,
           "dark": {
             "backgroundColor": "#0F1417",
-            "image": "./assets/images/splash-icon.png"
+            "image": "./assets/images/blueberry-splash.png"
           }
         }
       ],

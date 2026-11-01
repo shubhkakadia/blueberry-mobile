@@ -1,8 +1,11 @@
-import { Host, Picker } from '@expo/ui';
+import { Host } from '@expo/ui';
 import { useState } from 'react';
 import { StyleSheet, TextInput, View } from 'react-native';
+import Animated from 'react-native-reanimated';
 
 import { ThemedText } from '@/components/themed-text';
+import { riseInAt } from '@/components/ui/motion';
+import { Picker } from '@/components/ui/picker';
 import { FontFamily, Radius } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useTheme } from '@/hooks/use-theme';
@@ -57,7 +60,8 @@ export function DayCard({
     .join(' · ');
 
   return (
-    <View
+    <Animated.View
+      entering={riseInAt(day.dayOffset)}
       accessibilityLabel={`${weekday}${isToday ? ', today' : ''}`}
       style={[
         styles.card,
@@ -118,7 +122,7 @@ export function DayCard({
           {meta}
         </ThemedText>
       </View>
-    </View>
+    </Animated.View>
   );
 }
 

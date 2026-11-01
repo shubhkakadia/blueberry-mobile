@@ -2,7 +2,6 @@ import { SymbolView } from 'expo-symbols';
 import type { ReactNode } from 'react';
 import {
   ActivityIndicator,
-  Pressable,
   StyleSheet,
   type PressableProps,
   type StyleProp,
@@ -10,6 +9,7 @@ import {
 } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
+import { Pressable } from '@/components/ui/pressable';
 import type { IconName } from '@/constants/icons';
 import { Radius } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
+import Animated from 'react-native-reanimated';
 
 import { RuntimeRange } from '@/components/runtime-range';
 import { Segments } from '@/components/segments';
@@ -7,6 +8,7 @@ import { ThemedText } from '@/components/themed-text';
 import { Alert } from '@/components/ui/alert';
 import { Card } from '@/components/ui/card';
 import { EmptyState } from '@/components/ui/empty-state';
+import { easeChanges, growAcross, riseIn } from '@/components/ui/motion';
 import { SkeletonBlock } from '@/components/ui/skeleton';
 import { Icons } from '@/constants/icons';
 import { ACTIVITY_SECTIONS } from '@/constants/sections';
@@ -68,7 +70,7 @@ export default function RoomsScreen() {
             <SkeletonBlock style={{ height: 280, borderRadius: Radius.panel }} />
           </View>
         ) : (
-          <View style={[styles.stack, loading && styles.dimmed]}>
+          <Animated.View entering={riseIn} style={[styles.stack, easeChanges, loading && styles.dimmed]}>
             <View style={styles.totals}>
               <ThemedText type="meta" themeColor="fgMuted" style={styles.medium}>
                 Total airflow, {rangeLabel}
@@ -98,8 +100,12 @@ export default function RoomsScreen() {
                     </View>
                     {/* A room's share of the busiest room. */}
                     <View style={[styles.track, { backgroundColor: theme.surfaceInset }]}>
-                      <View
-                        style={[styles.bar, { width: `${(room.seconds / max) * 100}%`, backgroundColor: theme.accent }]}
+                      <Animated.View
+                        style={[
+                          styles.bar,
+                          growAcross,
+                          { width: `${(room.seconds / max) * 100}%`, backgroundColor: theme.accent, animationDelay: index * 40 },
+                        ]}
                       />
                     </View>
                   </View>
@@ -131,7 +137,7 @@ export default function RoomsScreen() {
                 </Card>
               </View>
             )}
-          </View>
+          </Animated.View>
         )}
       </View>
     </ScrollView>

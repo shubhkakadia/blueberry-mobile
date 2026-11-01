@@ -1,11 +1,13 @@
 import { SymbolView } from 'expo-symbols';
 import { useEffect, useState } from 'react';
 import { StyleSheet, Switch, View } from 'react-native';
+import Animated from 'react-native-reanimated';
 
 import { ThemedText } from '@/components/themed-text';
 import { Button, IconButton } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Tag } from '@/components/ui/chip';
+import { easeChanges, fadeOut, riseIn, riseInAt, settle } from '@/components/ui/motion';
 import { SkeletonBlock } from '@/components/ui/skeleton';
 import { Icons } from '@/constants/icons';
 import { getClimateTheme, Radius } from '@/constants/theme';
@@ -51,12 +53,15 @@ function settingsLine(schedule: Schedule): string {
 }
 
 export function TimerCard({
+  index,
   schedule,
   zoneNames,
   onToggle,
   onEdit,
   onRun,
 }: {
+  /** Its place in the list, which staggers the list's arrival. */
+  index: number;
   schedule: Schedule;
   zoneNames: string[];
   onToggle: () => Promise<unknown>;
@@ -91,16 +96,16 @@ export function TimerCard({
   };
 
   return (
-    <Card level="tile" padding="lg" style={styles.card}>
+    <Card level="tile" padding="lg" entering={riseInAt(index)} layout={settle} style={styles.card}>
       <View style={styles.top}>
-        <View style={[styles.flex, styles.titles, dim]}>
+        <Animated.View style={[styles.flex, styles.titles, easeChanges, dim]}>
           <ThemedText numberOfLines={1} style={styles.name}>
             {schedule.name}
           </ThemedText>
           <ThemedText type="meta" style={status.running ? { color: theme.accent, fontWeight: '600' } : { color: theme.fgMuted }}>
             {status.text}
           </ThemedText>
-        </View>
+        </Animated.View>
         <IconButton icon={Icons.pencil} label={`Edit ${schedule.name}`} onPress={onEdit} />
         <Switch
           value={enabled}
@@ -113,7 +118,7 @@ export function TimerCard({
         />
       </View>
 
-      <View style={[styles.body, dim]}>
+      <Animated.View style={[styles.body, easeChanges, dim]}>
         <ThemedText style={styles.range}>
           {formatClock(schedule.startTime)} – {formatClock(schedule.stopTime)}
         </ThemedText>
@@ -146,7 +151,7 @@ export function TimerCard({
             {settingsLine(schedule)}
           </ThemedText>
         </View>
-      </View>
+      </Animated.View>
 
       <View>
         <View style={[styles.actions, { borderTopColor: theme.hairline }]}>
@@ -170,17 +175,18 @@ export function TimerCard({
             onPress={() => setHistoryOpen((open) => !open)}
             style={styles.history}
             trailing={
-              <SymbolView
-                name={Icons.chevronDown}
-                size={16}
-                tintColor={theme.fg}
-                style={historyOpen && styles.flipped}
-              />
+              <Animated.View style={[styles.chevron, easeChanges, historyOpen && styles.flipped]}>
+                <SymbolView name={Icons.chevronDown} size={16} tintColor={theme.fg} />
+              </Animated.View>
             }>
             History
           </Button>
         </View>
-        {historyOpen && <RunHistory scheduleId={schedule.id} />}
+        {historyOpen && (
+          <Animated.View entering={riseIn} exiting={fadeOut}>
+            <RunHistory scheduleId={schedule.id} />
+          </Animated.View>
+        )}
       </View>
     </Card>
   );
@@ -276,6 +282,8 @@ const styles = StyleSheet.create({
   actions: { flexDirection: 'row', gap: 8, borderTopWidth: 1, paddingTop: 14 },
   action: { flex: 1, minWidth: 0, paddingHorizontal: 8 },
   history: { paddingLeft: 12, paddingRight: 8, gap: 4 },
+  // A real starting point: Android snaps a transform's first transition from no transform at all.
+  chevron: { transform: [{ rotate: '0deg' }] },
   flipped: { transform: [{ rotate: '180deg' }] },
   historyBody: { paddingTop: 12 },
   historyLoading: { gap: 8 },

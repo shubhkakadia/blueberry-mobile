@@ -1,7 +1,8 @@
 import type { ReactNode } from 'react';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
+import { Pressable } from '@/components/ui/pressable';
 import { Gutter } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 

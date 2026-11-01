@@ -5,7 +5,7 @@ import Animated from 'react-native-reanimated';
 
 import { ThemedText } from '@/components/themed-text';
 import { IconButton } from '@/components/ui/button';
-import { riseIn } from '@/components/ui/motion';
+import { fadeOut, riseIn } from '@/components/ui/motion';
 import { Icons, type IconName } from '@/constants/icons';
 import { Radius } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
@@ -35,6 +35,7 @@ export function Alert({ tone = 'danger', title, icon, onDismiss, onRetry, style,
   return (
     <Animated.View
       entering={riseIn}
+      exiting={fadeOut}
       accessibilityRole={tone === 'info' ? undefined : 'alert'}
       style={[styles.alert, { backgroundColor: box }, style]}>
       <SymbolView name={icon ?? toneIcon} size={20} tintColor={ink} style={styles.icon} />

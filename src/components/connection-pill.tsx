@@ -1,6 +1,8 @@
 import { StyleSheet, View } from 'react-native';
+import Animated from 'react-native-reanimated';
 
 import { ThemedText } from '@/components/themed-text';
+import { easeChanges } from '@/components/ui/motion';
 import { useTheme } from '@/hooks/use-theme';
 
 /** Live / Offline: whether the bridge can reach the console. The dot turns accent while a command is in flight. */
@@ -12,7 +14,7 @@ export function ConnectionPill({ connected, pending }: { connected: boolean; pen
       accessible
       accessibilityLabel={connected ? 'Connected to the bridge' : 'The bridge is offline'}
       style={[styles.pill, { backgroundColor: theme.glass }]}>
-      <View style={[styles.dot, { backgroundColor: dot }]} />
+      <Animated.View style={[styles.dot, easeChanges, { backgroundColor: dot }]} />
       <ThemedText type="xs" style={[styles.label, { color: theme.accentDeep }]}>
         {connected ? 'Live' : 'Offline'}
       </ThemedText>

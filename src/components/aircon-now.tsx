@@ -1,10 +1,13 @@
 import { Host, Slider } from '@expo/ui';
 import { SymbolView } from 'expo-symbols';
 import { useCallback } from 'react';
-import { Pressable, StyleSheet, Switch, View } from 'react-native';
+import { StyleSheet, Switch, View } from 'react-native';
+import Animated from 'react-native-reanimated';
 
 import { ThemedText } from '@/components/themed-text';
 import { EmptyState } from '@/components/ui/empty-state';
+import { easeChanges, riseIn, settle, tick } from '@/components/ui/motion';
+import { Pressable } from '@/components/ui/pressable';
 import { SkeletonBlock } from '@/components/ui/skeleton';
 import { climateIcon, Icons, type IconName } from '@/constants/icons';
 import { getClimateTheme, Radius, Type, type ClimateTheme } from '@/constants/theme';
@@ -48,7 +51,7 @@ export function AirconNow({ state, mutate, loading, climate, selectedZoneNumber,
   const roomsOn = state.zones.filter((zone) => isOn(zone.power)).length;
 
   return (
-    <View>
+    <Animated.View entering={riseIn}>
       {ac ? (
         <>
           <MainUnit ac={ac} ability={ability} climate={climate} mutate={mutate} selectedZoneNumber={selectedZoneNumber} />
@@ -63,21 +66,24 @@ export function AirconNow({ state, mutate, loading, climate, selectedZoneNumber,
       )}
 
       {nextTimer && (
-        <Pressable
-          accessibilityRole="button"
-          accessibilityHint="Opens the timers"
-          onPress={onOpenTimers}
-          style={({ pressed }) => [styles.nextTimer, { backgroundColor: theme.glass }, pressed && styles.pressedSoft]}>
-          <SymbolView name={Icons.clock} size={20} tintColor={theme.accent} />
-          <ThemedText type="body" style={styles.flex}>
-            {nextTimer.name && <ThemedText type="body" style={styles.semibold}>{`${nextTimer.name} `}</ThemedText>}
-            {nextTimer.when}
-          </ThemedText>
-          <SymbolView name={Icons.chevronRight} size={18} tintColor={theme.fgMuted} />
-        </Pressable>
+        <Animated.View entering={riseIn}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityHint="Opens the timers"
+            onPress={onOpenTimers}
+            style={({ pressed }) => [styles.nextTimer, { backgroundColor: theme.glass }, pressed && styles.pressedSoft]}>
+            <SymbolView name={Icons.clock} size={20} tintColor={theme.accent} />
+            <ThemedText type="body" style={styles.flex}>
+              {nextTimer.name && <ThemedText type="body" style={styles.semibold}>{`${nextTimer.name} `}</ThemedText>}
+              {nextTimer.when}
+            </ThemedText>
+            <SymbolView name={Icons.chevronRight} size={18} tintColor={theme.fgMuted} />
+          </Pressable>
+        </Animated.View>
       )}
 
-      <View style={styles.rooms}>
+      {/* The next-timer line arrives after the rest, so the rooms make way for it. */}
+      <Animated.View layout={settle} style={styles.rooms}>
         <View style={styles.roomsHeader}>
           <ThemedText accessibilityRole="header" style={styles.roomsTitle}>
             Rooms
@@ -96,8 +102,8 @@ export function AirconNow({ state, mutate, loading, climate, selectedZoneNumber,
             <EmptyState icon={Icons.house} title="No rooms yet" body="Waiting for rooms from the console…" />
           )}
         </View>
-      </View>
-    </View>
+      </Animated.View>
+    </Animated.View>
   );
 }
 
@@ -138,15 +144,21 @@ function MainUnit({
     );
 
   const setpointColor = on ? theme.accentDeep : theme.fgSubtle;
+  const status = on ? climate.status : 'Off';
 
   return (
     <View style={styles.mainUnit}>
       <View style={styles.mainRow}>
         <View style={styles.flex}>
           <ThemedText style={[styles.caps, { color: theme.accentDeep }]}>Main unit</ThemedText>
-          <ThemedText numberOfLines={1} accessibilityLiveRegion="polite" style={[styles.status, { color: theme.accent }]}>
-            {on ? climate.status : 'Off'}
-          </ThemedText>
+          {/* The live region stays put while the reading inside it is replaced, or Android would not announce it. */}
+          <View accessibilityLiveRegion="polite">
+            <Animated.View key={status} style={tick}>
+              <ThemedText numberOfLines={1} style={[styles.status, { color: theme.accent }]}>
+                {status}
+              </ThemedText>
+            </Animated.View>
+          </View>
         </View>
         <Pressable
           onPress={togglePower}
@@ -176,7 +188,9 @@ function MainUnit({
             accessibilityLabel={`Set to ${setpoint} degrees Celsius`}
             accessibilityLiveRegion="polite"
             style={styles.hero}>
-            <ThemedText style={[Type.hero, styles.tabular, { color: setpointColor }]}>{setpoint}</ThemedText>
+            <Animated.View key={setpoint} style={tick}>
+              <ThemedText style={[Type.hero, styles.tabular, { color: setpointColor }]}>{setpoint}</ThemedText>
+            </Animated.View>
             <ThemedText style={[styles.degree, { color: setpointColor }]}>°</ThemedText>
           </View>
           {ac.temperature !== null && (
@@ -339,9 +353,11 @@ function RoomRow({ zone, mutate, first }: { zone: ZoneState; mutate: Mutate; fir
   return (
     <View style={[styles.room, !first && { borderTopWidth: 1, borderColor: theme.hairline }]}>
       <View style={styles.roomTop}>
-        <ThemedText numberOfLines={1} style={[styles.roomName, !on && styles.dimmed]}>
-          {zone.name}
-        </ThemedText>
+        <Animated.View style={[styles.flex, easeChanges, !on && styles.dimmed]}>
+          <ThemedText numberOfLines={1} style={styles.roomName}>
+            {zone.name}
+          </ThemedText>
+        </Animated.View>
         <Switch
           value={on}
           accessibilityLabel={`${zone.name} on or off`}
@@ -357,7 +373,7 @@ function RoomRow({ zone, mutate, first }: { zone: ZoneState; mutate: Mutate; fir
           }
         />
       </View>
-      <View style={[styles.damper, !on && styles.dimmed]}>
+      <Animated.View style={[styles.damper, easeChanges, !on && styles.dimmed]}>
         <ThemedText type="xs" themeColor="fgMuted" style={styles.damperCaption}>
           Damper
         </ThemedText>
@@ -379,7 +395,7 @@ function RoomRow({ zone, mutate, first }: { zone: ZoneState; mutate: Mutate; fir
         <ThemedText type="sm" numberOfLines={1} style={[styles.readout, styles.tabular]}>
           {percentage}%
         </ThemedText>
-      </View>
+      </Animated.View>
     </View>
   );
 }
@@ -444,7 +460,7 @@ const styles = StyleSheet.create({
   roomsCard: { borderRadius: Radius.tile, paddingHorizontal: 16 },
   room: { gap: 4, paddingTop: 8, paddingBottom: 14 },
   roomTop: { flexDirection: 'row', alignItems: 'center', gap: 8, minHeight: 44 },
-  roomName: { flex: 1, fontWeight: '600' },
+  roomName: { fontWeight: '600' },
   damper: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   damperCaption: { width: 50, fontWeight: '500' },
   // Wide enough for "100%" in Geologica, which runs wider than the web's 40px.

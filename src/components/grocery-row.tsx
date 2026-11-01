@@ -1,9 +1,10 @@
 import { SymbolView } from 'expo-symbols';
 import { useRef } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import ReanimatedSwipeable, { type SwipeableMethods } from 'react-native-gesture-handler/ReanimatedSwipeable';
 
 import { ThemedText } from '@/components/themed-text';
+import { Pressable } from '@/components/ui/pressable';
 import { Icons } from '@/constants/icons';
 import { useTheme } from '@/hooks/use-theme';
 import { formatAddedAt, type ChecklistItem } from '@/lib/checklists';

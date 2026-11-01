@@ -1,4 +1,5 @@
 import { RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
+import Animated from 'react-native-reanimated';
 
 import { BillList, openBill } from '@/components/bill-list';
 import { Segments } from '@/components/segments';
@@ -7,6 +8,7 @@ import { Alert } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { EmptyState } from '@/components/ui/empty-state';
+import { riseIn } from '@/components/ui/motion';
 import { SkeletonBlock } from '@/components/ui/skeleton';
 import { Icons } from '@/constants/icons';
 import { SETTINGS_SECTIONS } from '@/constants/sections';
@@ -54,7 +56,7 @@ export default function PlanScreen() {
           </Card>
         </View>
       ) : (
-        <View style={styles.stack}>
+        <Animated.View entering={riseIn} style={styles.stack}>
           {error && <Alert onRetry={() => void reload()}>Showing the last loaded data. {error}</Alert>}
 
           <Card level="tile" padding="lg" accessibilityLabel="Retailer" style={styles.retailer}>
@@ -95,7 +97,7 @@ export default function PlanScreen() {
               Add a bill
             </Button>
           </View>
-        </View>
+        </Animated.View>
       )}
     </ScrollView>
   );

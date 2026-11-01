@@ -2,6 +2,7 @@ import { useFocusEffect } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Alert as Dialog, AppState, RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
 import type { SwipeableMethods } from 'react-native-gesture-handler/ReanimatedSwipeable';
+import Animated from 'react-native-reanimated';
 
 import { GroceryRow } from '@/components/grocery-row';
 import { Segments } from '@/components/segments';
@@ -10,6 +11,7 @@ import { Alert } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Chip, ChipRow } from '@/components/ui/chip';
 import { Input } from '@/components/ui/input';
+import { fadeOut, riseIn, settle } from '@/components/ui/motion';
 import { SkeletonBlock } from '@/components/ui/skeleton';
 import { HOUSE_SECTIONS } from '@/constants/sections';
 import { Gutter, Radius } from '@/constants/theme';
@@ -230,15 +232,17 @@ export default function GroceriesScreen() {
   const bought = items.filter((item) => item.completed);
 
   const row = (item: ChecklistItem, index: number) => (
-    <GroceryRow
-      key={item.id}
-      item={item}
-      first={index === 0}
-      removing={removingId === item.id}
-      onToggle={() => void toggleItem(item)}
-      onRemove={() => confirmRemove(item)}
-      onOpen={onRowOpen}
-    />
+    // One layer while it fades: Android otherwise fades each child alone, and the red swipe action shows through.
+    <Animated.View key={item.id} entering={riseIn} exiting={fadeOut} layout={settle} needsOffscreenAlphaCompositing>
+      <GroceryRow
+        item={item}
+        first={index === 0}
+        removing={removingId === item.id}
+        onToggle={() => void toggleItem(item)}
+        onRemove={() => confirmRemove(item)}
+        onOpen={onRowOpen}
+      />
+    </Animated.View>
   );
 
   return (
@@ -325,26 +329,36 @@ export default function GroceriesScreen() {
         ) : (
           selectedId !== null && (
             <>
-              <View
+              <Animated.View
+                layout={settle}
                 accessibilityLabel="To buy"
                 style={[styles.panel, { backgroundColor: theme.surface, boxShadow: theme.shadowE1 }]}>
                 {outstanding.map(row)}
                 {outstanding.length === 0 && (
-                  <ThemedText type="sm" themeColor="fgMuted" style={styles.empty}>
-                    Nothing left to buy here.
-                  </ThemedText>
+                  <Animated.View entering={riseIn} exiting={fadeOut}>
+                    <ThemedText type="sm" themeColor="fgMuted" style={styles.empty}>
+                      Nothing left to buy here.
+                    </ThemedText>
+                  </Animated.View>
                 )}
-              </View>
+              </Animated.View>
 
               {/* Bought stays on the page rather than vanishing: it is what you
                   check against at the till, and a mis-tap is one tap to undo. */}
               {bought.length > 0 && (
-                <View accessibilityLabel="Bought" style={styles.bought}>
+                <Animated.View
+                  entering={riseIn}
+                  exiting={fadeOut}
+                  layout={settle}
+                  accessibilityLabel="Bought"
+                  style={styles.bought}>
                   <ThemedText type="eyebrow" themeColor="fgMuted" accessibilityRole="header" style={styles.eyebrow}>
                     Bought · {bought.length}
                   </ThemedText>
-                  <View style={[styles.panel, { backgroundColor: theme.surfaceDim }]}>{bought.map(row)}</View>
-                </View>
+                  <Animated.View layout={settle} style={[styles.panel, { backgroundColor: theme.surfaceDim }]}>
+                    {bought.map(row)}
+                  </Animated.View>
+                </Animated.View>
               )}
             </>
           )

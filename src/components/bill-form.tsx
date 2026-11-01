@@ -11,6 +11,7 @@ import {
   type KeyboardTypeOptions,
   type ScrollViewInstance,
 } from 'react-native';
+import Animated from 'react-native-reanimated';
 
 import { ThemedText } from '@/components/themed-text';
 import { DateField } from '@/components/time-field';
@@ -20,6 +21,7 @@ import { Card } from '@/components/ui/card';
 import { Chip, ChipRow } from '@/components/ui/chip';
 import { Field } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
+import { easeChanges, fadeOut, riseIn, settle } from '@/components/ui/motion';
 import { Icons } from '@/constants/icons';
 import { Gutter, Radius } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
@@ -335,7 +337,7 @@ export function BillForm({ bill, today }: { bill: EnergyBill | null; today: stri
             </Card>
           </Section>
 
-          <View accessibilityLabel="Check total" style={[styles.check, { backgroundColor: check.bg }]}>
+          <Animated.View accessibilityLabel="Check total" style={[styles.check, easeChanges, { backgroundColor: check.bg }]}>
             <TotalLine label="Rate periods" value={money(totals.gross)} color={check.ink} />
             <TotalLine
               label="Discounts & adjustments"
@@ -350,7 +352,7 @@ export function BillForm({ bill, today }: { bill: EnergyBill | null; today: stri
                 {message}
               </ThemedText>
             </View>
-          </View>
+          </Animated.View>
 
           {bill && (
             <Button variant="danger" size="lg" icon={Icons.trash} fullWidth disabled={busy} onPress={confirmDelete}>
@@ -438,7 +440,14 @@ function PeriodCard({
   );
 
   return (
-    <Card level="tile" padding="md" accessibilityLabel={`Period ${number}`} style={styles.period}>
+    <Card
+      level="tile"
+      padding="md"
+      entering={riseIn}
+      exiting={fadeOut}
+      layout={settle}
+      accessibilityLabel={`Period ${number}`}
+      style={styles.period}>
       <View style={styles.periodHead}>
         <ThemedText type="body" accessibilityRole="header" style={styles.semibold}>
           Period {number}

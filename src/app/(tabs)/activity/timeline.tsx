@@ -1,6 +1,7 @@
 import { SymbolView } from 'expo-symbols';
 import { useState } from 'react';
 import { RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
+import Animated from 'react-native-reanimated';
 
 import { RuntimeRange } from '@/components/runtime-range';
 import { Segments } from '@/components/segments';
@@ -9,6 +10,7 @@ import { Alert } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { EmptyState } from '@/components/ui/empty-state';
+import { riseInAt } from '@/components/ui/motion';
 import { SkeletonBlock } from '@/components/ui/skeleton';
 import { Icons, type IconName } from '@/constants/icons';
 import { ACTIVITY_SECTIONS } from '@/constants/sections';
@@ -85,8 +87,8 @@ export default function TimelineScreen() {
           <EmptyState icon={Icons.activity} title="Nothing recorded" body="No room had airflow during this period." />
         ) : (
           <View style={styles.days}>
-            {days.map((day) => (
-              <View key={day.key} style={styles.day}>
+            {days.map((day, index) => (
+              <Animated.View key={day.key} entering={riseInAt(index)} style={styles.day}>
                 <View style={styles.dayHead}>
                   <ThemedText type="body" accessibilityRole="header" style={styles.semibold}>
                     {dayLabel(day.key, todayKey)}
@@ -100,7 +102,7 @@ export default function TimelineScreen() {
                     <RunRow key={run.key} run={run} timeZone={data.timeZone} first={index === 0} />
                   ))}
                 </Card>
-              </View>
+              </Animated.View>
             ))}
 
             {data.sessions.length < data.total && (

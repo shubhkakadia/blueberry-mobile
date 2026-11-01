@@ -1,5 +1,6 @@
 import { SymbolView } from 'expo-symbols';
-import { Pressable, RefreshControl, ScrollView, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
+import { RefreshControl, ScrollView, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
+import Animated from 'react-native-reanimated';
 
 import { BillList, openBill } from '@/components/bill-list';
 import { Segments } from '@/components/segments';
@@ -8,6 +9,8 @@ import { Alert } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { EmptyState } from '@/components/ui/empty-state';
+import { growUp, riseIn } from '@/components/ui/motion';
+import { Pressable } from '@/components/ui/pressable';
 import { SkeletonBlock } from '@/components/ui/skeleton';
 import { Icons } from '@/constants/icons';
 import { ACTIVITY_SECTIONS } from '@/constants/sections';
@@ -80,7 +83,7 @@ export default function CostsScreen() {
         ) : null}
 
         {data && summary && (
-          <>
+          <Animated.View entering={riseIn} style={styles.stack}>
             {stale && (
               <Alert tone="warning">
                 Your latest bill ended more than 90 days ago. Add a recent one to keep the tariff and daily average
@@ -123,7 +126,7 @@ export default function CostsScreen() {
               Forecasts assume you keep using about {summary.dailyKwh.toFixed(1)} kWh a day at your latest tariff. Fees
               and credits are left out, and nothing is filled in before or between bills.
             </ThemedText>
-          </>
+          </Animated.View>
         )}
       </View>
     </ScrollView>
@@ -210,7 +213,7 @@ function MonthlyChart({ summary }: { summary: CostSummary }) {
               <View key={tick} style={[styles.gridline, { bottom: px(tick), borderColor: theme.hairline }]} />
             ))}
             <View style={styles.columns}>
-              {months.map((month) => {
+              {months.map((month, index) => {
                 const { low, high } = band(month);
                 const estimated = month.estimatedDays > 0;
                 const shown = covered(month) && month.totalCents > 0;
@@ -222,10 +225,11 @@ function MonthlyChart({ summary }: { summary: CostSummary }) {
                       />
                     )}
                     {shown && (
-                      <View
+                      <Animated.View
                         style={[
                           styles.bar,
-                          { height: px(month.totalCents) },
+                          growUp,
+                          { height: px(month.totalCents), animationDelay: index * 30 },
                           estimated
                             ? [styles.dashed, { borderColor: theme.accent, backgroundColor: theme.surface }]
                             : { backgroundColor: theme.accent },
@@ -326,19 +330,21 @@ function RuntimeChart({ profile }: { profile: RuntimeProfile }) {
         </ThemedText>
       ) : (
         <View accessible accessibilityRole="image" accessibilityLabel={label} style={styles.hours}>
-          {hours.map((bucket) => {
+          {hours.map((bucket, index) => {
             const top = bucket === busiest;
             return (
               <View key={bucket.hour} style={styles.hour}>
                 <ThemedText style={[styles.tick, styles.semibold, { color: top ? theme.chartHot : theme.fgMuted }]}>
                   {bucket.value.toFixed(1)}
                 </ThemedText>
-                <View
+                <Animated.View
                   style={[
                     styles.hourBar,
+                    growUp,
                     {
                       height: Math.max(4, Math.round((bucket.value / max) * RUNTIME)),
                       backgroundColor: top ? theme.chartHot : theme.accentMuted,
+                      animationDelay: index * 30,
                     },
                   ]}
                 />

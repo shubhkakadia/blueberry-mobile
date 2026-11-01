@@ -8,7 +8,7 @@ import { Alert } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Field } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
-import { riseIn } from '@/components/ui/motion';
+import { riseInAt } from '@/components/ui/motion';
 import { climateTint, getClimateTheme, Radius } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useTheme } from '@/hooks/use-theme';
@@ -56,10 +56,10 @@ export default function SignInScreen() {
       <KeyboardAvoidingView behavior="padding" style={styles.fill}>
         <SafeAreaView style={styles.fill}>
           <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-            <View style={styles.intro}>
+            <Animated.View entering={riseInAt(0)} style={styles.intro}>
               {/* The app icon itself; its tile is the page's own tint, so a shadow draws the edge. */}
               <Image
-                source={require('@/assets/images/icon.png')}
+                source={require('@/assets/images/blueberry-icon.png')}
                 accessibilityIgnoresInvertColors
                 style={[styles.mark, { boxShadow: theme.shadowE2 }]}
               />
@@ -71,10 +71,10 @@ export default function SignInScreen() {
                   The aircon, the timers, the shopping and dinner — for everyone at home.
                 </ThemedText>
               </View>
-            </View>
+            </Animated.View>
 
             <Animated.View
-              entering={riseIn}
+              entering={riseInAt(1)}
               style={[styles.form, { backgroundColor: theme.surface, boxShadow: theme.shadowE2 }]}>
               <ThemedText type="display">Sign in</ThemedText>
 
