@@ -44,6 +44,10 @@ and a SQLite file. So:
 ## 2. Cross-cutting concerns (solved once, in Modules 0–1)
 
 ### 2.1 Reaching the bridge
+> **Superseded in M9:** the app now always uses `https://blueberrymandal.com`
+> (a Cloudflare Tunnel to the bridge), with no address entry. The original plan
+> follows.
+
 The web UI used relative URLs (same origin). The app needs a **bridge address**,
 entered on the sign-in screen and kept on the device. Two expected kinds:
 
@@ -487,9 +491,20 @@ in Costs exactly as on the web.
 - EAS project `@cabipro-software/blueberry` (slug `blueberry`), linked with
   `eas init --id`. The app is **Blueberry**, app ID `com.blueberrymandal.app` on
   both platforms (from the domain blueberrymandal.com).
-- The bridge is reached over **Tailscale HTTPS only** (open question 2), so no
-  cleartext or local-network config. A bare address now gets `https://`; an
-  explicit `http://` still works in Expo Go for a bridge on the dev machine.
+- The bridge is reached at **`https://blueberrymandal.com`**, published through a
+  Cloudflare Tunnel (open question 2). This replaced the first plan, Tailscale
+  with a typed-in address.
+  - **No address entry:** `API_URL` in `src/lib/api.ts` is built in, sign-in
+    asks only for username and password, and nothing about the server is
+    stored on the phone. Settings shows the host.
+  - **Local testing:** `EXPO_PUBLIC_API_URL` in a gitignored `.env.local`
+    points a dev session at a bridge on this machine (`http://` works in Expo
+    Go only).
+  - **Errors:** a 5xx with no JSON body (Cloudflare answering for a home
+    server that's off) reads "The home server isn't answering (530)".
+  - **Privacy page:** served by the bridge at `/privacy`
+    (`web/public/privacy.html` in Home-Management-System).
+  - **Release builds stay HTTPS-only;** no cleartext or local-network config.
 - `eas.json`: `preview` makes an internal build (Android APK, iOS ad hoc);
   `production` makes store builds, with build numbers kept remotely by EAS and
   incremented on each build. No development profile: nothing native was added
@@ -552,7 +567,8 @@ in Costs exactly as on the web.
 ## 6. Open questions
 
 1. ~~**App name/identity**~~ Settled in M9: **Blueberry**, `com.blueberrymandal.app`.
-2. ~~**Bridge address**~~ Settled in M9: Tailscale HTTPS only.
+2. ~~**Bridge address**~~ Settled in M9: `https://blueberrymandal.com` through a
+   Cloudflare Tunnel, built into the app.
 3. **Design:** match the web's look exactly (the Bridge design, see
    `Home Aircon Bridge.html`), or use native iOS/Android controls where they
    differ?

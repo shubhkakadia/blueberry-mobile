@@ -16,15 +16,17 @@ app.
 
 ## 0. Decide how far to go
 
-Blueberry signs in to **your** bridge, which only your tailnet can reach. That
-decides how much store review you face:
+Blueberry always talks to **your** bridge at `https://blueberrymandal.com`,
+published through a Cloudflare Tunnel. Reviewers can reach that address, but
+any account you give them would control your real aircon. That decides how much
+store review you face:
 
 | Route | Who can install | Store review | Extra work |
 | --- | --- | --- | --- |
 | **Android — Internal testing** *(recommended)* | Up to 100 people you list by email | Light; available to testers quickly | None |
-| Android — Closed / Production | Your list, or anyone on Play | Full review; reviewers must sign in | Personal accounts first need a **12-tester, 14-day closed test**; a demo bridge for reviewers |
+| Android — Closed / Production | Your list, or anyone on Play | Full review; reviewers must sign in | Personal accounts first need a **12-tester, 14-day closed test**; a demo account for reviewers |
 | **iOS — TestFlight, internal testers** *(recommended)* | Up to 100 members of your App Store Connect team | **None** | Builds expire after **90 days**: upload a new one before then |
-| iOS — TestFlight external / App Store | Anyone with the link, or everyone | Full App Review; reviewers must sign in | A demo bridge reachable from the internet with a demo account (see [§5](#5-if-you-go-public-a-demo-bridge-for-reviewers)) |
+| iOS — TestFlight external / App Store | Anyone with the link, or everyone | Full App Review; reviewers must sign in | A demo account that can't touch the real aircon (see [§5](#5-if-you-go-public-a-demo-account-for-reviewers)) |
 
 For a household app, the two recommended routes give everyone a store install
 and automatic updates, with no public listing and no reviewer access to your
@@ -43,11 +45,15 @@ Keep these at hand; every answer below comes from them.
 - **What the app does:** controls an AirTouch 4 air conditioner, and shares a
   grocery list, dinner plan and electricity costs, for one household.
 - **Where data goes:**
-  - Only to the household's own **bridge**, at the address the user types,
-    over HTTPS on Tailscale.
+  - Only to the household's own **bridge** at `https://blueberrymandal.com`,
+    built into the app. It is reached through **Cloudflare**, which carries the
+    traffic over a Cloudflare Tunnel to the home server and stores none of it.
   - And to **Expo's update service** (`u.expo.dev`) to check for updates.
+  - Cloudflare and Expo act as **service providers**. Neither store counts that
+    as "sharing".
 - **Data sent to the bridge:**
-  - username and password
+  - username and password; each sign-in session keeps the app's user agent and
+    last-used time for 30 days
   - aircon changes, recorded with who made them, plus runtime history
   - timers
   - grocery items, dishes, dinner notes
@@ -68,8 +74,8 @@ Keep these at hand; every answer below comes from them.
 
 | # | Item | Who | Notes |
 | --- | --- | --- | --- |
-| 2.1 | **Privacy policy page** at `https://blueberrymandal.com/privacy` | 🧑 publish, 🤖 drafted | Text is in [`privacy-policy.md`](privacy-policy.md). Fill its 3 placeholders. Both stores require it. |
-| 2.2 | **Support page** at `https://blueberrymandal.com/support` | 🧑 | Apple requires a support URL. A short page with a contact email is enough. |
+| 2.1 | **Privacy policy page** at `https://blueberrymandal.com/privacy` | 🤖 built, 🧑 tunnel | The bridge serves it, signed out, once the Cloudflare Tunnel is live (see [`privacy-policy.md`](privacy-policy.md)). Fill in its contact email first. Both stores require it. |
+| 2.2 | **Support URL** | 🧑 | Apple requires one. Until there's a support page, `https://blueberrymandal.com/privacy#contact` leads to the contact email. |
 | 2.3 | **Contact email** on the domain (e.g. `hello@blueberrymandal.com`) | 🧑 | Shown publicly on both listings. |
 | 2.4 | **Store icon** 512×512 PNG (Play) | 🤖 | Same artwork as the app icon. |
 | 2.5 | **Feature graphic** 1024×500 PNG/JPG (Play, required) | 🤖 | |
@@ -155,16 +161,12 @@ Every declaration, in Play's order.
 - Choose **All or some functionality is restricted**.
 - **Add instructions:**
   - **Name:** `Household bridge sign-in`
-  - **Username / Password:** a demo account on a reachable bridge (only when
-    going beyond internal testing, see §5). For internal testing, write
-    "N/A – internal household use".
+  - **Username / Password:** the demo account (only when going beyond internal
+    testing, see §5). For internal testing, write "N/A – internal household use".
   - **Any other information:**
-    > Blueberry is the remote for a self-hosted home server ("bridge") that
-    > controls an AirTouch 4 air conditioner. Accounts are created on the
-    > bridge by its owner; there is no sign-up. Enter the bridge address
-    > below, then the username and password.
-
-    Add the bridge address when you have one for reviewers.
+    > Blueberry is the remote for our household's home server, which controls
+    > an AirTouch 4 air conditioner. Accounts are created by us; there is no
+    > sign-up. Sign in with the username and password above.
 
 **Content rating** (IARC questionnaire)
 - **Email:** 2.3.
@@ -397,12 +399,12 @@ type your Apple ID, password and 2FA code into EAS; I can't.
 | Promotional text | 170 | §6 |
 | Description | 4000 | §6 |
 | Keywords | 100 | §6 |
-| Support URL | — | `https://blueberrymandal.com/support` |
+| Support URL | — | `https://blueberrymandal.com/privacy#contact` (see 2.2) |
 | Marketing URL | — | `https://blueberrymandal.com` (optional) |
 | Copyright | — | `2026 Blueberry Mandal` |
 | Build | — | Pick the TestFlight build |
 | **App Review → Sign-in required** | — | Demo username and password (§5) |
-| App Review → Notes | — | Same text as Play's App access, plus the demo bridge address |
+| App Review → Notes | — | Same text as Play's App access |
 | App Review → Contact | — | Your name, phone, email |
 | Version release | — | **Manually release this version** |
 
@@ -479,21 +481,21 @@ Other Data.
 
 ---
 
-## 5. If you go public: a demo bridge for reviewers
+## 5. If you go public: a demo account for reviewers
 
-Reviewers at Google and Apple must be able to sign in. They can't reach your
-tailnet, and they shouldn't control your real aircon. If you choose a public or
-external route, set up:
+Reviewers at Google and Apple must be able to sign in. The app always talks to
+`blueberrymandal.com`, so they'd sign in to your real bridge. An ordinary
+account there would let a stranger switch your aircon on and read your lists.
+If you choose a public or external route, the bridge needs:
 
-1. A **second bridge** with a **simulated console** (no hardware) and sample
-   data: rooms, a timer, groceries, a bill.
-2. Expose only that bridge to the internet over HTTPS. **Tailscale Funnel** does
-   this from the same machine.
-3. A **demo account** on it, entered in Play's *App access* and Apple's
-   *App Review information*.
+1. A **demo account** whose aircon commands go to a **simulated console**
+   instead of the real one, and whose lists and bills are sample data, kept
+   apart from the household's.
+2. That account entered in Play's *App access* and Apple's *App Review
+   information*, and deleted or disabled once review is done.
 
-🤖 I can build the simulated console and set this up as its own task when you
-want to go public. It isn't needed for internal testing or internal TestFlight.
+🤖 This is bridge work I can do as its own task when you want to go public. It
+isn't needed for internal testing or internal TestFlight.
 
 ---
 
@@ -517,8 +519,8 @@ companies' trademarks there.
 
 **Full description (both stores, 4000):**
 
-> Blueberry is the household remote for your home. It works with your own
-> Blueberry bridge, a small server at home that talks to your AirTouch 4
+> Blueberry is our household's remote for home. It works with the Blueberry
+> home server, a small computer at home that talks to the AirTouch 4
 > air-conditioning console.
 >
 > **Aircon**
@@ -536,18 +538,19 @@ companies' trademarks there.
 >   for the rest of the year
 >
 > **Private by design**
-> Everything you add stays on your household's own bridge, reached over your
-> private network. No ads, no tracking, no analytics.
+> Everything you add stays on the home server, reached over an encrypted
+> connection. No ads, no tracking, no analytics.
 >
-> Blueberry needs a Blueberry bridge set up at home. Accounts are created by
-> whoever runs the bridge.
+> Blueberry is for members of our household: accounts are created by us, and
+> there is no public sign-up.
 
 ---
 
 ## 7. Release checklist
 
-- [ ] 2.1 Privacy policy live at `/privacy`
-- [ ] 2.2 Support page live
+- [ ] Cloudflare Tunnel live for `blueberrymandal.com`, bridge started with `TRUST_PROXY=true`
+- [ ] 2.1 Privacy policy live at `/privacy`, contact email filled in
+- [ ] 2.2 Support URL decided
 - [ ] 2.3 Contact email works
 - [ ] 3.1 Play developer account verified
 - [ ] 3.2 Play app created
@@ -560,7 +563,7 @@ companies' trademarks there.
 - [ ] 4.2 First iOS build and submit
 - [ ] 4.3 TestFlight internal group, household invited
 - [ ] 4.4–4.6 App Store listing, age rating and App Privacy (only for public)
-- [ ] §5 Demo bridge (only for public)
+- [ ] §5 Demo account (only for public)
 
 **Sources:**
 - [Play: app testing requirements for new personal accounts](https://support.google.com/googleplay/android-developer/answer/14151465)

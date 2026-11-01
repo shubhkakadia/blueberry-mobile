@@ -15,24 +15,22 @@ import { useTheme } from '@/hooks/use-theme';
 import { useAuth } from '@/lib/auth';
 
 export default function SignInScreen() {
-  const { bridge, notice, signIn } = useAuth();
+  const { notice, signIn } = useAuth();
   const theme = useTheme();
   const tint = climateTint(getClimateTheme('cool'), useColorScheme() === 'dark' ? 'dark' : 'light');
-  const [address, setAddress] = useState(bridge ?? '');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(notice);
   const [busy, setBusy] = useState(false);
-  const usernameRef = useRef<TextInputInstance>(null);
   const passwordRef = useRef<TextInputInstance>(null);
-  const incomplete = !address.trim() || !username.trim() || !password;
+  const incomplete = !username.trim() || !password;
 
   const submit = async () => {
     if (busy || incomplete) return;
     setBusy(true);
     setError(null);
     try {
-      await signIn(address, username, password);
+      await signIn(username, password);
     } catch (e) {
       setError((e as Error).message);
       // The field is uncontrolled, so clear it natively too.
@@ -80,28 +78,10 @@ export default function SignInScreen() {
               style={[styles.form, { backgroundColor: theme.surface, boxShadow: theme.shadowE2 }]}>
               <ThemedText type="display">Sign in</ThemedText>
 
-              <Field label="Bridge address" hint="Its Tailscale address, like home.your-tailnet.ts.net.">
-                {(a11y) => (
-                  <Input
-                    {...a11y}
-                    value={address}
-                    onChangeText={setAddress}
-                    keyboardType="url"
-                    textContentType="URL"
-                    autoCapitalize="none"
-                    autoCorrect={false}
-                    returnKeyType="next"
-                    submitBehavior="submit"
-                    onSubmitEditing={() => usernameRef.current?.focus()}
-                  />
-                )}
-              </Field>
-
               <Field label="Username">
                 {(a11y) => (
                   <Input
                     {...a11y}
-                    ref={usernameRef}
                     value={username}
                     onChangeText={setUsername}
                     autoComplete="username"

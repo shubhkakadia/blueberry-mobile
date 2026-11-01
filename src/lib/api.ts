@@ -1,46 +1,21 @@
-import * as SecureStore from 'expo-secure-store';
-
 /**
- * Talking to the Home Management System bridge. The web UI used relative URLs;
- * here every request is prefixed with the address entered at sign-in, and the
- * session rides in the bridge's cookie, which the native cookie jar stores and
- * resends.
+ * Talking to the Home Management System bridge, published at the household's
+ * domain through a Cloudflare Tunnel. The web UI used relative URLs; here every
+ * request is prefixed with that address, and the session rides in the bridge's
+ * cookie, which the native cookie jar stores and resends.
+ *
+ * `EXPO_PUBLIC_API_URL` (e.g. in a gitignored `.env.local`) points a dev session
+ * at a bridge on this machine instead. Plain `http` works only in Expo Go: release
+ * builds allow HTTPS alone.
  */
+export const API_URL = (process.env.EXPO_PUBLIC_API_URL ?? 'https://blueberrymandal.com').replace(/\/+$/, '');
 
-const BRIDGE_KEY = 'bridge-address';
+/** `blueberrymandal.com`: the address as people read it. */
+export const API_HOST = API_URL.replace(/^https?:\/\//, '');
 
-let bridge: string | null = null;
-
-/** The stored bridge address, or null on first launch. Requests go to it from here on. */
-export async function loadBridgeAddress(): Promise<string | null> {
-  bridge = await SecureStore.getItemAsync(BRIDGE_KEY).catch(() => null);
-  return bridge;
-}
-
-/** Points requests at an address without storing it, so a typo never replaces a working one. */
-export function setBridgeAddress(address: string): void {
-  bridge = address;
-}
-
-/** Stores the current address for the next launch. */
-export async function rememberBridgeAddress(): Promise<void> {
-  if (bridge) await SecureStore.setItemAsync(BRIDGE_KEY, bridge);
-}
-
-/** `ws(s)://` for a path on the bridge, e.g. the live-state socket. */
+/** `wss://` for a path on the bridge, e.g. the live-state socket. */
 export function bridgeSocketUrl(path: string): string {
-  if (!bridge) throw new Error('No bridge address is set.');
-  return `${bridge.replace(/^http/, 'ws')}${path}`;
-}
-
-/**
- * `home.tailnet.ts.net` → `https://home.tailnet.ts.net`. Release builds allow only
- * HTTPS (the bridge is reached over Tailscale); an explicit `http://` still works in
- * Expo Go, for a bridge on this machine.
- */
-export function normalizeBridge(input: string): string {
-  const trimmed = input.trim().replace(/\/+$/, '');
-  return /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
+  return `${API_URL.replace(/^http/, 'ws')}${path}`;
 }
 
 const unauthorized = new Set<() => void>();
@@ -58,15 +33,14 @@ export function onUnauthorized(listener: () => void): () => void {
 
 /**
  * fetch against the bridge. Times out rather than hanging on the OS connect
- * timeout (over a minute on Android for a dead LAN address), and says which
+ * timeout (over a minute on Android for a dead address), and says which
  * address could not be reached.
  */
 async function send(path: string, init: RequestInit = {}, timeoutMs = 15_000): Promise<Response> {
-  if (!bridge) throw new Error('No bridge address is set.');
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
-    return await fetch(`${bridge}${path}`, {
+    return await fetch(`${API_URL}${path}`, {
       ...init,
       credentials: 'include',
       headers: { 'Content-Type': 'application/json', ...init.headers },
@@ -74,9 +48,7 @@ async function send(path: string, init: RequestInit = {}, timeoutMs = 15_000): P
     });
   } catch {
     throw new Error(
-      controller.signal.aborted
-        ? `The bridge at ${bridge} didn't answer.`
-        : `Couldn't reach the bridge at ${bridge}.`,
+      controller.signal.aborted ? `${API_HOST} didn't answer.` : `Couldn't reach ${API_HOST}.`,
     );
   } finally {
     clearTimeout(timer);
@@ -86,6 +58,10 @@ async function send(path: string, init: RequestInit = {}, timeoutMs = 15_000): P
 async function parse<T>(response: Response): Promise<T> {
   if (response.status === 204) return undefined as T;
   const body = await response.json().catch(() => ({}));
+  if (!response.ok && !body.error && response.status >= 500) {
+    // No JSON from the bridge: Cloudflare answering for a home server that is off or offline.
+    throw new Error(`The home server isn't answering (${response.status}).`);
+  }
   if (!response.ok) throw new Error(body.error ?? `request failed (${response.status})`);
   return body as T;
 }
@@ -107,13 +83,6 @@ export interface AuthUser {
 }
 
 export const authApi = {
-  /** Confirms the address is a bridge before a password is sent to it. */
-  async checkBridge(): Promise<void> {
-    const response = await send('/healthz', {}, 5_000);
-    const body = await response.json().catch(() => null);
-    if (body?.status !== 'ok') throw new Error(`No bridge answered at ${bridge}.`);
-  },
-
   /** Resolves to null when not signed in, rather than throwing. */
   async me(): Promise<AuthUser | null> {
     const response = await send('/api/auth/me', {}, 5_000);

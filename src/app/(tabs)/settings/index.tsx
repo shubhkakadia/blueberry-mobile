@@ -13,6 +13,7 @@ import { Gutter, Radius } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useSystemState } from '@/hooks/use-system-state';
 import { useTheme } from '@/hooks/use-theme';
+import { API_HOST } from '@/lib/api';
 import { useAuth, useUser } from '@/lib/auth';
 import { loadThemePreference, saveThemePreference, type ThemePreference } from '@/lib/theme-preference';
 
@@ -25,7 +26,7 @@ const THEME_OPTIONS = [
 /** Settings · General, ported from the web's `Settings.tsx`. */
 export default function SettingsScreen() {
   const user = useUser();
-  const { bridge, signOut } = useAuth();
+  const { signOut } = useAuth();
   const { state, room } = useSystemState();
   const theme = useTheme();
   // Native hosts follow the device's scheme unless told the app's.
@@ -145,7 +146,7 @@ export default function SettingsScreen() {
             <Value>{state.zones.length}</Value>
           </Readout>
           <Readout label="Address" style={divider}>
-            <Value>{bridge ?? '—'}</Value>
+            <Value>{API_HOST}</Value>
           </Readout>
         </Card>
       </View>
@@ -165,7 +166,7 @@ export default function SettingsScreen() {
       </Button>
 
       <ThemedText type="meta" themeColor="fgMuted" style={styles.footer}>
-        Aircon control · local network only. Nothing here leaves the house.
+        Blueberry · everything you add stays on the home server.
       </ThemedText>
     </ScrollView>
   );
