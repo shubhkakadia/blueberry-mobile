@@ -74,9 +74,9 @@ Keep these at hand; every answer below comes from them.
 
 | # | Item | Who | Notes |
 | --- | --- | --- | --- |
-| 2.1 | **Privacy policy page** at `https://blueberrymandal.com/privacy` | 🤖 built, 🧑 tunnel | The bridge serves it, signed out, once the Cloudflare Tunnel is live (see [`privacy-policy.md`](privacy-policy.md)). Fill in its contact email first. Both stores require it. |
+| 2.1 | **Privacy policy page** at `https://blueberrymandal.com/privacy` | 🤖 built, 🧑 tunnel | The bridge serves it, signed out, once the Cloudflare Tunnel is live (see [`privacy-policy.md`](privacy-policy.md)). Both stores require it. |
 | 2.2 | **Support URL** | 🧑 | Apple requires one. Until there's a support page, `https://blueberrymandal.com/privacy#contact` leads to the contact email. |
-| 2.3 | **Contact email** on the domain (e.g. `hello@blueberrymandal.com`) | 🧑 | Shown publicly on both listings. |
+| 2.3 | **Contact email:** `shubhkakadia@gmail.com` | ✅ | Shown publicly on the privacy page and both listings. |
 | 2.4 | **Store icon** 512×512 PNG (Play) | 🤖 | Same artwork as the app icon. |
 | 2.5 | **Feature graphic** 1024×500 PNG/JPG (Play, required) | 🤖 | |
 | 2.6 | **Phone screenshots** | 🤖 Android / 🧑 iPhone | Play: 2–8 phone screenshots, 16:9 or 9:16, 320–3840 px per side. Apple: 6.9″ iPhone screenshots (1320×2868 or 1290×2796), which must come from an iPhone or the iOS simulator. |
@@ -549,9 +549,8 @@ companies' trademarks there.
 ## 7. Release checklist
 
 - [ ] Cloudflare Tunnel live for `blueberrymandal.com`, bridge started with `TRUST_PROXY=true`
-- [ ] 2.1 Privacy policy live at `/privacy`, contact email filled in
+- [ ] 2.1 Privacy policy live at `/privacy`
 - [ ] 2.2 Support URL decided
-- [ ] 2.3 Contact email works
 - [ ] 3.1 Play developer account verified
 - [ ] 3.2 Play app created
 - [ ] 3.3 Internal testing release live, household opted in
