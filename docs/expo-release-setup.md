@@ -35,9 +35,10 @@ release stays a manual step in each store's console.
 | `preview` and `production` build profiles | ✅ In `eas.json` |
 | Android signing key | ✅ Created by EAS (made for the preview build; a production build should reuse it) |
 | Over-the-air updates | ✅ Configured |
-| iOS signing | ❌ Needs your Apple sign-in (Part 2) |
-| Store connections | ❌ Parts 1 and 2 |
-| GitHub connection and workflow | ❌ Part 3 |
+| iOS signing | ✅ First iOS production build finished |
+| App Store ID in `eas.json` | ✅ Added |
+| Workflow file | ✅ In the repo; runs only once the GitHub connection is on and it's pushed |
+| Store keys and GitHub connection | Parts 1, 2 and 3.1 (can't be confirmed from the repo) |
 
 ---
 
@@ -75,7 +76,8 @@ This key is what lets Expo upload to Play on your behalf.
    name such as `eas-submit`, then select **Create and close**. Copy the
    account's email address.
 3. On that account, open **Manage keys → Create new key → JSON → Create**.
-   Save the downloaded file **outside this repo**. It's a secret.
+   Save the downloaded file **outside this repo**. It's a secret. (`credentials/`
+   is gitignored as a safety net.)
 4. In the Google Cloud API library, enable the **Google Play Android Developer
    API**.
 
@@ -192,8 +194,10 @@ settings. Install the Expo GitHub app and connect
 
 ### 3.2 Add the repo changes 🤖
 
-Send me the `ascAppId` from 2.2 and I'll make these two changes. They're listed
-here so you can see exactly what goes in.
+Both are done. They're listed here so you can see exactly what went in.
+
+**Before pushing:** commit any icon or `app.json` changes first. The workflow only
+sees what's pushed, so otherwise it builds and submits without them.
 
 **A. `eas.json`: add the App Store app ID.** Automated iOS submissions fail
 without it.
@@ -202,7 +206,7 @@ without it.
 "submit": {
   "production": {
     "ios": {
-      "ascAppId": "<the Apple ID from 2.2>"
+      "ascAppId": "6829208634"
     }
   }
 }
@@ -366,12 +370,13 @@ per platform.
 - [ ] 1.2 Service account invited in Play Console
 - [ ] 1.3 Key stored in Expo
 - [ ] 1.4 First Android build on internal testing
-- [ ] 2.1 First iOS build done in a terminal
-- [ ] 2.2 App Store Connect app created, `ascAppId` copied
+- [x] 2.1 First iOS build done in a terminal
+- [x] 2.2 App Store Connect app created, `ascAppId` copied
 - [ ] 2.3 API key set up
 - [ ] 2.4 First build in TestFlight, automatic distribution on
 - [ ] 3.1 GitHub repo connected
-- [ ] 3.2 Repo changes added and pushed
+- [x] 3.2 Repo changes added
+- [ ] 3.2 Icon changes committed, then everything pushed
 - [ ] 3.3 Update path and build path both tested
 
 **Sources:**
