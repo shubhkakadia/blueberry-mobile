@@ -530,6 +530,10 @@ in Costs exactly as on the web.
 - `android.blockedPermissions` drops the template's storage and "draw over
   other apps" permissions, and secure-store's biometric ones. The app uses none
   of them. Applies from the next build.
+- Automated releases: [`expo-release-setup.md`](expo-release-setup.md) connects
+  both stores to Expo, so a push to `master` builds and submits or publishes an
+  update. Not set up yet. It replaces the version-bump rule above with the
+  `fingerprint` runtime policy.
 - Store publishing: [`store-setup.md`](store-setup.md) is the step-by-step
   guide (Play internal testing and TestFlight internal recommended).
   [`privacy-policy.md`](privacy-policy.md) is the draft policy for

@@ -123,23 +123,18 @@ Keep these at hand; every answer below comes from them.
 
 ### 3.3 First build and upload 🤖 + 🧑
 
-Google's API can't create an app's first release, so the **first upload is
-manual**.
-
-1. 🤖 Build the store bundle (AAB):
-   `eas build --platform android --profile production`
-2. 🧑 **Testing → Internal testing → Create new release**.
-   - **App signing:** choose *Use Google-generated key*, the default. Google
-     signs what users install, and the key EAS made becomes your **upload
-     key**. Keep it in EAS; it's backed up there.
-   - Upload the `.aab` from the EAS build page.
-   - **Release name:** `1.0.0 (1)`.
-   - **Release notes:** "First release."
-   - **Next → Save and publish**.
-3. 🧑 **Testers** tab → **Create email list** ("Household") → add each
-   person's Google account email → **Save**.
-4. Copy the **opt-in link** and send it to them. They accept, then install
+1. 🧑 Connect Play to Expo and send the first build by following
+   [`expo-release-setup.md`](expo-release-setup.md), Part 1. Expo's `eas submit`
+   creates the first release on the internal testing track.
+2. 🧑 **Testing → Internal testing → Testers** tab → **Create email list**
+   ("Household") → add each person's Google account email → **Save**.
+3. Copy the **opt-in link** and send it to them. They accept, then install
    Blueberry from Play.
+
+To upload by hand instead: build with
+`eas build --platform android --profile production`, go to **Testing → Internal
+testing → Create new release**, keep the default Google-generated signing key, and
+upload the `.aab` from the EAS build page.
 
 > Anyone who installed the preview **APK** must **uninstall it first**. Google
 > re-signs the Play version, so it can't install over the APK.
@@ -280,22 +275,8 @@ files, calendar, web history, audio, crash logs, diagnostics, and so on.
 
 ### 3.7 Automatic uploads from now on 🧑 then 🤖
 
-So `eas submit` can upload future builds:
-
-1. 🧑 **Google Cloud Console** (same Google account):
-   1. Create a project.
-   2. Enable the **Google Play Android Developer API**.
-   3. **IAM → Service accounts → Create** (`eas-submit`).
-   4. **Keys → Add key → JSON**, and download it.
-2. 🧑 **Play Console → Users and permissions → Invite new users** → paste the
-   service account's email.
-   - **App permissions:** Blueberry.
-   - Tick **Release apps to testing tracks** and **Release to production…**,
-     or only testing.
-3. 🧑 Run `eas credentials` → Android → production →
-   **Google Service Account → Upload** the JSON. Don't commit the file.
-4. 🤖 From then on: `eas build -p android --profile production --auto-submit`.
-   It goes to the internal track, the EAS default.
+See [`expo-release-setup.md`](expo-release-setup.md), Parts 1 and 3. Once connected,
+pushing to `master` builds and submits for you, to the internal track by default.
 
 ### 3.8 Going to Production later (optional)
 
@@ -326,7 +307,8 @@ So `eas submit` can upload future builds:
 ### 4.2 Register the app 🤖 + 🧑
 
 The bundle ID and signing are created by EAS on the first iOS build. **You**
-type your Apple ID, password and 2FA code into EAS; I can't.
+type your Apple ID, password and 2FA code into EAS; I can't. To automate later
+builds, see [`expo-release-setup.md`](expo-release-setup.md), Parts 2 and 3.
 
 1. 🧑 In a terminal in this project:
    `eas build --platform ios --profile production`
